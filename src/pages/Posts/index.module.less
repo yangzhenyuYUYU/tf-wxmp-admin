@@ -1,0 +1,78 @@
+@primary-color: #1890ff;
+@success-color: #52c41a;
+@warning-color: #faad14;
+@error-color: #ff4d4f;
+
+.posts {
+  padding: 24px;
+  background: #f0f2f5;
+  min-height: 100%;
+
+  :global {
+    .ant-card {
+      border-radius: 8px;
+      
+      .ant-card-body {
+        padding: 24px;
+      }
+    }
+
+    .ant-form {
+      margin-bottom: 24px;
+      
+      .ant-form-item {
+        margin-bottom: 16px;
+        
+        .ant-input-prefix {
+          color: rgba(0, 0, 0, 0.25);
+        }
+      }
+    }
+
+    .ant-table-wrapper {
+      .ant-table {
+        .ant-table-thead > tr > th {
+          background: #fafafa;
+          font-weight: 500;
+        }
+        
+        .ant-table-tbody > tr:hover > td {
+          background: #f5f5f5;
+        }
+      }
+
+      .ant-tag {
+        margin: 0;
+        
+        &.ant-tag-gold {
+          color: #d48806;
+          background: #fffbe6;
+          border-color: #ffe58f;
+        }
+        
+        .anticon {
+          margin-right: 4px;
+        }
+      }
+
+      .ant-space {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 13px;
+        
+        .ant-space-item {
+          display: flex;
+          align-items: center;
+        }
+      }
+
+      .ant-btn-link {
+        padding: 4px 8px;
+        height: auto;
+        
+        &:hover {
+          background: rgba(0, 0, 0, 0.018);
+        }
+      }
+    }
+  }
+} 

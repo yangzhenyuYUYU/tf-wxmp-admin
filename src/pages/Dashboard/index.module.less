@@ -1,0 +1,177 @@
+@primary-color: #135200;        // 深墨绿
+@primary-light: #f6ffed;        // 淡绿
+@secondary-color: #faad14;      // 橙黄
+@danger-color: #ff4d4f;         // 橙红
+@text-color: #262626;           // 深灰
+@text-secondary: #8c8c8c;       // 浅灰
+
+.dashboard {
+  padding: 24px;
+
+  .overviewCards {
+    margin-bottom: 24px;
+    
+    .statItem {
+      display: flex;
+      align-items: center;
+      
+      .icon {
+        font-size: 24px;
+        margin-right: 16px;
+        padding: 12px;
+        background: #f0f5ff;
+        border-radius: 50%;
+      }
+      
+      .content {
+        .title {
+          color: rgba(0, 0, 0, 0.45);
+          font-size: 14px;
+          margin-bottom: 4px;
+        }
+        
+        .number {
+          font-size: 24px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .lists {
+    .userItem, .postItem {
+      display: flex;
+      align-items: center;
+      
+      .index {
+        width: 24px;
+        margin-right: 16px;
+        color: rgba(0, 0, 0, 0.45);
+      }
+      
+      .username, .title {
+        flex: 1;
+      }
+      
+      .count {
+        color: rgba(0, 0, 0, 0.45);
+      }
+      
+      .stats {
+        span {
+          margin-left: 16px;
+          color: rgba(0, 0, 0, 0.45);
+          
+          .anticon {
+            margin-right: 4px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.hotPostCard {
+  :global {
+    .ant-card-head {
+      border-bottom: 2px solid @primary-color;
+    }
+  }
+}
+
+.postItem {
+  padding: 16px 24px;
+  transition: all 0.3s;
+  
+  &:hover {
+    background-color: @primary-light;
+  }
+}
+
+.postContent {
+  width: 100%;
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.title {
+  font-size: 15px;
+  line-height: 1.5;
+  padding-right: 16px;
+  color: @text-color;
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.excellentTag {
+  margin-right: 8px;
+  
+  :global {
+    .anticon {
+      margin-right: 4px;
+    }
+  }
+}
+
+.postFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: @text-secondary;
+  font-size: 13px;
+  margin-top: 12px;
+  
+  .leftContent {
+    display: flex;
+    align-items: center;
+    
+    .author {
+      color: @primary-color;
+      margin-right: 16px;
+      font-weight: 500;
+    }
+    
+    .date {
+      color: @text-secondary;
+    }
+  }
+  
+  .stats {
+    display: flex;
+    gap: 24px;
+    
+    span {
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      
+      .anticon {
+        margin-right: 4px;
+      }
+      
+      &:hover {
+        color: @secondary-color;
+      }
+    }
+  }
+} 
