@@ -18,9 +18,11 @@ const Login = () => {
       
       if (!data || code !== 0) return;
       
-      const { access_token, user_info } = data;
+      const { access_token, refresh_token, system_token, admin_info } = data;
       localStorage.setItem('token', access_token);
-      localStorage.setItem('userInfo', JSON.stringify(user_info));
+      localStorage.setItem('refresh_token', refresh_token); 
+      localStorage.setItem('userInfo', JSON.stringify(admin_info));
+      localStorage.setItem('system_token', system_token);
       message.success('登录成功');
       navigate('/', { replace: true });
       

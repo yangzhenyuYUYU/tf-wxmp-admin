@@ -1,4 +1,4 @@
-import { http } from '../utils/request';
+import { ApiResponse, http } from '../utils/request';
 
 const API_PREFIX = '/analytics';
 
@@ -13,6 +13,11 @@ export interface UserActions {
   posts: number;
   comments: number;
   likes: number;
+  favorites: number;
+  views?: number;
+  shares?: number;
+  reports?: number;
+  follows?: number;
 }
 
 export interface ContentStats {
@@ -35,11 +40,11 @@ export const analyticsApi = {
     http.get<UserGrowth[]>(`${API_PREFIX}/user-growth`, { params }),
     
   getUserActions: (params: { startDate: string; endDate: string }) =>
-    http.get<UserActions[]>(`${API_PREFIX}/user-actions`, { params }),
+    http.get<ApiResponse<{items: UserActions[], total: number}>>(`${API_PREFIX}/user-actions`, { params }),
     
   getContentStats: () =>
     http.get<ContentStats>(`${API_PREFIX}/content-stats`),
     
   getMonthlyStats: (params: { year: number; month: number }) =>
-    http.get<MonthlyStats>(`${API_PREFIX}/monthly-stats`, { params }),
+    http.get<ApiResponse<MonthlyStats>>(`${API_PREFIX}/monthly-stats`, { params }),
 }; 

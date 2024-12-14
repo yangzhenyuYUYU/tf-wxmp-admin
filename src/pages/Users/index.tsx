@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Table, Card, Space, Tag, Button, Modal, Form, Select, Input, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { userApi, User, UserRole, AccountStatus, UserUpdateParams } from '../../api/users';
+import { userApi, User, UserRole, AccountStatus, UserRoleLabel } from '../../api/users';
 import dayjs from 'dayjs';
 import styles from './index.module.less';
 
@@ -102,17 +102,21 @@ const Users = () => {
     },
     {
       title: '角色',
-      dataIndex: 'role',
+      dataIndex: 'role', 
       key: 'role',
       width: 100,
       render: (role: UserRole) => (
         <Tag color={
           role === UserRole.ADMIN ? 'red' :
           role === UserRole.TEACHER ? 'green' :
+          role === UserRole.PROFESSOR ? 'purple' :
+          role === UserRole.ASSISTANT ? 'orange' :
+          role === UserRole.RESEARCHER ? 'cyan' :
           role === UserRole.STUDENT ? 'blue' :
+          role === UserRole.USER ? 'default' :
           'default'
         }>
-          {role}
+          {UserRoleLabel[role.toUpperCase() as keyof typeof UserRoleLabel]}
         </Tag>
       ),
     },
@@ -177,8 +181,8 @@ const Users = () => {
           </Form.Item>
           <Form.Item name="role">
             <Select style={{ width: 120 }} allowClear placeholder="选择角色">
-              {Object.values(UserRole).map(role => (
-                <Option key={role} value={role}>{role}</Option>
+              {Object.entries(UserRole).map(([key, role]) => (
+                <Option key={role} value={role}>{UserRoleLabel[key as keyof typeof UserRoleLabel]}</Option>
               ))}
             </Select>
           </Form.Item>
@@ -234,8 +238,8 @@ const Users = () => {
             rules={[{ required: true, message: '请选择角色' }]}
           >
             <Select>
-              {Object.values(UserRole).map(role => (
-                <Option key={role} value={role}>{role}</Option>
+              {Object.entries(UserRole).map(([key, role]) => (
+                <Option key={role} value={role}>{UserRoleLabel[key as keyof typeof UserRoleLabel]}</Option>
               ))}
             </Select>
           </Form.Item>
@@ -247,14 +251,15 @@ const Users = () => {
             <Select>
               <Option value={AccountStatus.NORMAL}>正常</Option>
               <Option value={AccountStatus.REMOVE}>已删除</Option>
-            </Select>
+            </Select> 
           </Form.Item>
           <Form.Item
             name="is_verified"
             label="认证状态"
             valuePropName="checked"
+            rules={[{ required: true, message: '请选择认证状态' }]}
           >
-            <Select>
+            <Select placeholder="请选择认证状态">
               <Option value={true}>已认证</Option>
               <Option value={false}>未认证</Option>
             </Select>

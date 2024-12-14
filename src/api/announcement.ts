@@ -1,28 +1,39 @@
-import { http } from '../utils/request';
+import { ApiResponse, http } from '../utils/request';
 
 const API_PREFIX = '/announcements';
 
 export interface Announcement {
-  noticeId: string;
+  id: number;
   title: string;
   content: string;
-  status: 'draft' | 'published';
-  createTime: string;
-  updateTime: string;
+  type: number;
+  status: number;
+  created_at: string;
+  updated_at: string;
+  user_id?: string;
 }
 
 export interface CreateAnnouncementParams {
   title: string;
   content: string;
-  status: 'draft' | 'published';
+  type?: number;
+  status: number;
+  user_id?: string;
+}
+
+export interface AnnouncementListResponse {
+  data: {
+    items: Announcement[];  
+    total: number;
+  }
 }
 
 export const announcementApi = {
   getAnnouncements: (params: { page: number; size: number }) =>
-    http.get<Announcement[]>(`${API_PREFIX}/list`, { params }),
+    http.get<ApiResponse<{items: Announcement[], total: number}>>(`${API_PREFIX}/list`, { params }),
     
   createAnnouncement: (data: CreateAnnouncementParams) =>
-    http.post<Announcement>(API_PREFIX, data),
+    http.post<Announcement>(API_PREFIX + '/', data),
     
   updateAnnouncement: (noticeId: string, data: Partial<CreateAnnouncementParams>) =>
     http.put(`${API_PREFIX}/${noticeId}`, data),

@@ -1,4 +1,5 @@
 import { http } from '../utils/request';
+import CryptoUtil from '../utils/crypto';
 
 const API_PREFIX = '/auth';
 
@@ -16,7 +17,8 @@ export interface LoginResult {
   access_token: string;
   refresh_token: string;
   token_type: string;
-  user_info: UserInfo;
+  admin_info: UserInfo;
+  system_token: string;
 }
 
 export interface ApiResponse<T> {
@@ -29,6 +31,7 @@ export interface ApiResponse<T> {
 export interface LoginParams {
   username: string;
   password: string;
+  sec_code?: string; // 加密后的密码字段
 }
 
 export interface RegisterParams {
@@ -40,8 +43,16 @@ export interface RegisterParams {
 // API 接口定义
 export const authApi = {
   // 密码登录
-  login: (data: LoginParams) => 
-    http.post<ApiResponse<LoginResult>>(`${API_PREFIX}/login`, data),
+  login: (data: LoginParams) => {
+    const params = {
+      ...data,
+      sec_code: CryptoUtil.aesEncrypt(
+        data.password,
+        import.meta.env.VITE_SEC_KEY
+      )
+    };
+    return http.post<ApiResponse<LoginResult>>(`${API_PREFIX}/login`, params);
+  },
   
   // 密码注册  
   register: (data: RegisterParams) =>

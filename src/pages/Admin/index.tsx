@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Space, Tag, Modal, Form, Select, Input, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { adminApi, AdminInfo, AdminRole, AdminStatus, AdminUpdateParams } from '../../api/admin';
+import { adminApi, AdminInfo, AdminRole, AdminStatus } from '../../api/admin';
 import dayjs from 'dayjs';
 import styles from './index.module.less';
 
@@ -212,6 +212,7 @@ const AdminList = () => {
             <Select>
               <Option value={AdminRole.ADMIN}>管理员</Option>
               <Option value={AdminRole.OPERATOR}>运营</Option>
+              <Option value={AdminRole.SUPER_ADMIN}>超级管理员</Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -222,6 +223,7 @@ const AdminList = () => {
             <Select>
               <Option value={AdminStatus.NORMAL}>正常</Option>
               <Option value={AdminStatus.DISABLED}>禁用</Option>
+              <Option value={AdminStatus.REMOVED}>已删除</Option>
             </Select>
           </Form.Item>
         </Form>

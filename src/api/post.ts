@@ -36,4 +36,7 @@ export const postApi = {
 
   setExcellent: (post_id: number, is_excellent: boolean) =>
     http.put<ApiResponse<null>>(`/posts/${post_id}/excellent`, { is_excellent }),
+    
+  deletePost: (post_id: number) =>
+    http.delete<ApiResponse<null>>(`/posts/${post_id}`),
 };

@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Card, Table, Button, Image, Switch, message, Modal, Form, Input, Upload } from 'antd';
-import { PlusOutlined, LoadingOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { UploadFile, UploadProps } from 'antd/es/upload/interface';
-import { resourcesApi, Resource, ResourceName, ResourceStatus } from '../../../api/resources';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { resourcesApi, Resource, ResourceStatus } from '../../../api/resources';
 import styles from './index.module.less';
 
 const Banners = () => {
   const [banners, setBanners] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [uploadLoading, setUploadLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -22,10 +20,9 @@ const Banners = () => {
   const fetchBanners = async (page = currentPage, size = pageSize) => {
     try {
       setLoading(true);
-      const { code, data } = await resourcesApi.getResources({
+      const { code, data } = await resourcesApi.getBanners({
         page,
         size,
-        resource_name: ResourceName.BANNER,
       });
       if (code === 0 && data) {
         setBanners(data.items);
@@ -88,13 +85,12 @@ const Banners = () => {
 
   // 修改上传处理
   const uploadProps = {
-    listType: 'picture-card',
+    listType: 'picture-card' as const,
     maxCount: 1,
     showUploadList: false,
-    beforeUpload: async (file) => {
+    beforeUpload: async (file: File) => {
       try {
-        setUploadLoading(true);
-        const { code, data } = await resourcesApi.uploadFile(file);
+        const { code, data } = await resourcesApi.uploadFile(file, 'banner', 'image', 'public');
         if (code === 0 && data) {
           const previousUrl = form.getFieldValue('path');
           if (previousUrl) {
@@ -109,8 +105,6 @@ const Banners = () => {
         }
       } catch (error) {
         message.error('上传失败');
-      } finally {
-        setUploadLoading(false);
       }
       return false;
     }

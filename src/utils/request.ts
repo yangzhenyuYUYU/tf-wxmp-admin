@@ -19,6 +19,10 @@ request.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    const systemToken = localStorage.getItem('system_token');
+    if (systemToken) {
+      config.headers.SystemToken = systemToken;
+    }
     return config;
   },
   (error) => {
@@ -39,11 +43,17 @@ request.interceptors.response.use(
       case 401:
         message.error('请重新登录');
         // 清除token并跳转登录页
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+        setTimeout(() => {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }, 1000);
         break;
       case 403:
         message.error('没有权限');
+        setTimeout(() => {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }, 1000);
         break;
       case 404:
         message.error('资源不存在');
@@ -52,7 +62,11 @@ request.interceptors.response.use(
         message.error('请求参数错误');
         break;
       default:
-        message.error(response?.data?.msg || '服务器错误');
+        let errorMsg = response?.data?.msg || '服务器错误';
+        if (errorMsg.length > 100) {
+          errorMsg = '服务器异常错误';
+        }
+        message.error(errorMsg);
     }
     
     return Promise.reject(error);

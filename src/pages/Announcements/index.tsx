@@ -1,19 +1,31 @@
-import { Card, Table, Button, Modal, Form, Input, message, Tag } from 'antd';
+import { Card, Table, Button, Modal, Form, Input, message, Tag, Select } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useState, useEffect } from 'react';
+import { announcementApi, Announcement, CreateAnnouncementParams } from '../../api/announcement';
 
-interface Announcement {
-  id: number;
-  title: string;
-  content: string;
+interface TableAnnouncement extends Omit<Announcement, 'status'> {
   status: 'active' | 'inactive';
-  createTime: string;
 }
 
+const statusMap = {
+  0: 'inactive',
+  1: 'active'
+} as const;
+
+const reverseStatusMap = {
+  'inactive': 0,
+  'active': 1
+} as const;
+
 const Announcements = () => {
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [announcements, setAnnouncements] = useState<TableAnnouncement[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
   const [form] = Form.useForm();
 
   const columns = [
@@ -21,6 +33,16 @@ const Announcements = () => {
       title: '标题',
       dataIndex: 'title',
       key: 'title',
+    },
+    {
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type: string) => (
+        <Tag color={type === 'normal' ? 'green' : 'red'}>
+          {type === 'normal' ? '普通' : '重要'}
+        </Tag>
+      ),
     },
     {
       title: '状态',
@@ -33,14 +55,24 @@ const Announcements = () => {
       ),
     },
     {
+      title: '绑定用户',
+      dataIndex: 'user_id',
+      key: 'user_id',
+      render: (user_id: string) => (
+        <Tag color={user_id ? 'green' : 'red'}>
+          {user_id ? '已绑定' : '未绑定'}
+        </Tag>
+      ),
+    },
+    {
       title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
+      dataIndex: 'created_at',
+      key: 'created_at',
     },
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: Announcement) => (
+      render: (_: unknown, record: TableAnnouncement) => (
         <>
           <Button type="link" onClick={() => handleEdit(record)}>
             编辑
@@ -48,7 +80,7 @@ const Announcements = () => {
           <Button type="link" onClick={() => handlePreview(record)}>
             预览
           </Button>
-          <Button type="link" danger onClick={() => handleDelete(record.id)}>
+          <Button type="link" danger onClick={() => handleDelete(record.id.toString())}>
             删除
           </Button>
         </>
@@ -60,13 +92,20 @@ const Announcements = () => {
     fetchAnnouncements();
   }, []);
 
-  const fetchAnnouncements = async () => {
+  const fetchAnnouncements = async (page = 1, size = 10) => {
     setLoading(true);
     try {
-      // TODO: 替换为实际的 API 调用
-      const response = await fetch('/api/announcements');
-      const data = await response.json();
-      setAnnouncements(data);
+      const result = await announcementApi.getAnnouncements({ page, size });
+      const items = result.data.items.map((item: Announcement) => ({
+        ...item,
+        status: statusMap[item.status as 0 | 1]
+      }));
+      setAnnouncements(items);
+      setPagination({
+        ...pagination,
+        current: page,
+        total: result.data.total,
+      });
     } catch (error) {
       message.error('获取公告失败');
     } finally {
@@ -74,12 +113,12 @@ const Announcements = () => {
     }
   };
 
-  const handleEdit = (record: Announcement) => {
+  const handleEdit = (record: TableAnnouncement) => {
     form.setFieldsValue(record);
     setModalVisible(true);
   };
 
-  const handlePreview = (record: Announcement) => {
+  const handlePreview = (record: TableAnnouncement) => {
     Modal.info({
       title: record.title,
       content: (
@@ -89,16 +128,37 @@ const Announcements = () => {
     });
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
-      // TODO: 替换为实际的 API 调用
-      await fetch(`/api/announcements/${id}`, {
-        method: 'DELETE',
-      });
+      await announcementApi.deleteAnnouncement(id);
       message.success('删除成功');
-      fetchAnnouncements();
+      fetchAnnouncements(pagination.current, pagination.pageSize);
     } catch (error) {
       message.error('删除失败');
+    }
+  };
+
+  const handleSubmit = async (values: any) => {
+    try {
+      const submitData: CreateAnnouncementParams = {
+        ...values,
+        status: reverseStatusMap[values.status as keyof typeof reverseStatusMap],
+      };
+      
+      if (form.getFieldValue('id')) {
+        await announcementApi.updateAnnouncement(
+          form.getFieldValue('id'),
+          submitData
+        );
+      } else {
+        await announcementApi.createAnnouncement(submitData);
+      }
+      
+      message.success('保存成功');
+      setModalVisible(false);
+      fetchAnnouncements(pagination.current, pagination.pageSize);
+    } catch (error) {
+      message.error('保存失败');
     }
   };
 
@@ -124,6 +184,12 @@ const Announcements = () => {
           dataSource={announcements}
           loading={loading}
           rowKey="id"
+          pagination={{
+            ...pagination,
+            onChange: (page, pageSize) => {
+              fetchAnnouncements(page, pageSize);
+            },
+          }}
         />
       </Card>
 
@@ -137,20 +203,7 @@ const Announcements = () => {
         <Form
           form={form}
           layout="vertical"
-          onFinish={async (values) => {
-            try {
-              // TODO: 替换为实际的 API 调用
-              await fetch('/api/announcements', {
-                method: form.getFieldValue('id') ? 'PUT' : 'POST',
-                body: JSON.stringify(values),
-              });
-              message.success('保存成功');
-              setModalVisible(false);
-              fetchAnnouncements();
-            } catch (error) {
-              message.error('保存失败');
-            }
-          }}
+          onFinish={handleSubmit}
         >
           <Form.Item name="id" hidden>
             <Input />
@@ -158,26 +211,44 @@ const Announcements = () => {
           <Form.Item
             label="标题"
             name="title"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: '请输入标题' }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="内容"
             name="content"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: '请输入内容' }]}
           >
             <Input.TextArea rows={6} />
+          </Form.Item>
+          <Form.Item
+            label="类型"
+            name="type"
+            initialValue="normal"
+            rules={[{ required: true, message: '请选择类型' }]}
+          >
+            <Select>
+              <Select.Option value="normal">普通</Select.Option>
+              <Select.Option value="important">重要</Select.Option>
+            </Select>
           </Form.Item>
           <Form.Item
             label="状态"
             name="status"
             initialValue="active"
+            rules={[{ required: true, message: '请选择状态' }]}
           >
             <Select>
               <Select.Option value="active">发布</Select.Option>
               <Select.Option value="inactive">草稿</Select.Option>
             </Select>
+          </Form.Item>
+          <Form.Item
+            label="绑定用户ID"
+            name="user_id"
+          >
+            <Input placeholder="请输入用户ID" />
           </Form.Item>
         </Form>
       </Modal>
@@ -185,4 +256,4 @@ const Announcements = () => {
   );
 };
 
-export default Announcements; 
+export default Announcements;

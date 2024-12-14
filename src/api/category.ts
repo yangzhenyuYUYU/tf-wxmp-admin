@@ -1,31 +1,79 @@
 import { http } from '../utils/request';
 
-const API_PREFIX = '/categories';
-
-export interface Category {
-  categoryId: string;
-  name: string;
-  description: string;
-  sort: number;
-  createTime: string;
+export interface ApiResponse<T> {
+  code: number;
+  msg: string;
+  data: T;
 }
 
-export interface CreateCategoryParams {
+export interface Category {
+  id: number;
   name: string;
-  description: string;
-  sort?: number;
+  key: string;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+  knowledge_base_id?: number | string;
+}
+
+export interface CategoryStats {
+  total_levels: number;
+  level_counts: Record<number, number>;
+}
+
+export interface CategoryCreateParams {
+  name: string;
+  key: string;
+  sort_order?: number;
+}
+
+export interface CategoryUpdateParams {
+  name?: string;
+  key?: string;
+  sort_order?: number;
+}
+
+export interface LevelStats {
+  total_levels: number;
+  level_counts: Record<string, number>;
 }
 
 export const categoryApi = {
-  getCategories: () => 
-    http.get<Category[]>(`${API_PREFIX}/list`),
-    
-  createCategory: (data: CreateCategoryParams) =>
-    http.post<Category>(API_PREFIX, data),
-    
-  updateCategory: (categoryId: string, data: Partial<CreateCategoryParams>) =>
-    http.put(`${API_PREFIX}/${categoryId}`, data),
-    
-  deleteCategory: (categoryId: string) =>
-    http.delete(`${API_PREFIX}/${categoryId}`),
+  // 获取分类列表
+  getCategories: (params: { 
+    page: number; 
+    size: number; 
+    level?: number;
+    sort_field?: string;
+    sort_order?: 'ascend' | 'descend';
+  }) => http.get<ApiResponse<{items: Category[], total: number}>>('/categories', { params }),
+
+  // 获取分类统计信息
+  getCategoryStats: () =>
+    http.get<ApiResponse<CategoryStats>>('/categories/stats'),
+
+  // 获取指定层级的分类
+  getCategoriesByLevel: (level: number) =>
+    http.get<ApiResponse<Category[]>>(`/categories/level/${level}`),
+
+  // 创建分类
+  createCategory: (data: CategoryCreateParams) =>
+    http.post<ApiResponse<Category>>('/categories', data),
+
+  // 更新分类
+  updateCategory: (id: number, data: CategoryUpdateParams) =>
+    http.put<ApiResponse<Category>>(`/categories/${id}`, data),
+
+  // 删除分类
+  deleteCategory: (id: number) =>
+    http.delete<ApiResponse<Category>>(`/categories/${id}`),
+
+  // 获取单个分类
+  getCategory: (id: number) =>
+    http.get<ApiResponse<Category>>(`/categories/${id}`),
+
+  // 获取层级统计信息
+  getLevelStats: () => {
+    return http.get<ApiResponse<LevelStats>>('/api/categories/stats');
+  },
 }; 

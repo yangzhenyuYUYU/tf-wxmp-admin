@@ -7,6 +7,10 @@
   "compilerOptions": {
     "types": ["node"],
     "baseUrl": ".",
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "allowJs": true,
     "paths": {
       "@/*": ["src/*"]
     }

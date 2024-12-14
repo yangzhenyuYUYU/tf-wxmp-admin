@@ -1,7 +1,7 @@
-import { Table, Tag, Button, Space, Card, Form, Select, Input, message } from 'antd';
+import { Table, Tag, Button, Space, Card, Form, Select, Input, message, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState, useEffect } from 'react';
-import { RobotOutlined, SearchOutlined } from '@ant-design/icons';
+import { RobotOutlined, SearchOutlined, DownOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import styles from './index.module.less';
 import { postApi, PostItem } from '../../api/post';
@@ -15,6 +15,7 @@ const Posts = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [form] = Form.useForm();
+  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
 
   // 获取帖子列表
   const fetchPosts = async (page = currentPage, size = pageSize) => {
@@ -33,7 +34,6 @@ const Posts = () => {
       }
     } catch (error) {
       console.error('获取帖子列表失败:', error);
-      message.error('获取帖子列表失败');
     } finally {
       setLoading(false);
     }
@@ -66,6 +66,28 @@ const Posts = () => {
     }
   };
 
+  // 删除帖子
+  const handleDelete = (post_id: number) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: '确定要删除这条帖子吗？删除后不可恢复。',
+      okText: '确认',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          const { code } = await postApi.deletePost(post_id);
+          if (code === 0) {
+            message.success('删除成功');
+            fetchPosts();
+          }
+        } catch (error) {
+          console.error('删除帖子失败:', error);
+          message.error('删除失败');
+        }
+      },
+    });
+  };
+
   const columns: ColumnsType<PostItem> = [
     {
       title: 'ID',
@@ -75,36 +97,12 @@ const Posts = () => {
     {
       title: '问题内容',
       dataIndex: 'content',
-      width: 300,
       ellipsis: true,
     },
     {
       title: '作者',
       dataIndex: ['user', 'nickname'],
       width: 120,
-    },
-    {
-      title: '数据统计',
-      width: 280,
-      render: (_, record) => (
-        <Space size="middle">
-          <span>浏览 {record.view_count}</span>
-          <span>点赞 {record.like_count}</span>
-          <span>评论 {record.comment_count}</span>
-          <span>收藏 {record.favorite_count}</span>
-        </Space>
-      ),
-    },
-    {
-      title: 'AI回复',
-      width: 100,
-      render: (_, record) => (
-        record.has_ai_reply && (
-          <Tag color="blue" icon={<RobotOutlined />}>
-            {record.ai_reply_count}
-          </Tag>
-        )
-      ),
     },
     {
       title: '精华',
@@ -133,6 +131,14 @@ const Posts = () => {
             onClick={() => handleSetExcellent(record.id, record.is_excellent)}
           >
             {record.is_excellent ? '取消精华' : '设为精华'}
+          </Button>
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record.id)}
+          >
+            删除
           </Button>
         </Space>
       ),
@@ -181,6 +187,40 @@ const Posts = () => {
           dataSource={posts}
           rowKey="id"
           loading={loading}
+          expandable={{
+            expandedRowKeys,
+            onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as string[]),
+            expandedRowRender: (record) => (
+              <div style={{ padding: '12px 0' }}>
+                <div style={{ marginBottom: 16 }}>
+                  <h4>数据统计</h4>
+                  <Space size="middle">
+                    <Tag>浏览 {record.view_count}</Tag>
+                    <Tag>点赞 {record.like_count}</Tag>
+                    <Tag>评论 {record.comment_count}</Tag>
+                    <Tag>收藏 {record.favorite_count}</Tag>
+                  </Space>
+                </div>
+                <div>
+                  <h4>AI回复情况</h4>
+                  {record.has_ai_reply ? (
+                    <Tag color="blue" icon={<RobotOutlined />}>
+                      已回复 {record.ai_reply_count} 次
+                    </Tag>
+                  ) : (
+                    <Tag>暂无AI回复</Tag>
+                  )}
+                </div>
+              </div>
+            ),
+            expandIcon: ({ expanded, onExpand, record }) => (
+              <DownOutlined
+                rotate={expanded ? 180 : 0}
+                onClick={e => onExpand(record, e)}
+                style={{ transition: '0.3s', cursor: 'pointer' }}
+              />
+            ),
+          }}
           pagination={{
             current: currentPage,
             pageSize,
@@ -199,4 +239,4 @@ const Posts = () => {
   );
 };
 
-export default Posts; 
+export default Posts;

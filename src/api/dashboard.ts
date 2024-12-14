@@ -4,10 +4,19 @@ const API_PREFIX = '/dashboard';
 
 export interface DashboardOverview {
   total_users: number;
+  user_growth: number;
+  active_users: number;
   total_posts: number;
   new_users: number;
   new_posts: number;
+  post_growth: number;
+  today_posts: number;
+  total_ai_replies: number;
+  ai_reply_growth: number;
   today_ai_replies: number;
+  knowledge_count: number;
+  knowledge_base_count: number;
+  knowledge_growth: number;
 }
 
 export interface ActiveUser {
@@ -20,7 +29,14 @@ export interface ActiveUser {
 export interface HotPost {
   post_id: string;
   title: string;
+  content: string;
+  author: {
+    nickname: string;
+    avatar: string;
+  };
   view_count: number;
+  like_count: number;
+  favorite_count: number;
   comment_count: number;
   create_time: string;
 }

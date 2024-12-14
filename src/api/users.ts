@@ -11,6 +11,17 @@ export enum UserRole {
   DEFAULT = 'default'
 }
 
+export enum UserRoleLabel {
+  STUDENT = '学生',
+  TEACHER = '教师',
+  PROFESSOR = '教授',
+  ADMIN = '管理员',
+  ASSISTANT = '助教',
+  RESEARCHER = '研究员',
+  USER = '普通用户',
+  DEFAULT = '默认用户'
+}
+
 export enum AccountStatus {
   NORMAL = 1,
   REMOVE = -1
