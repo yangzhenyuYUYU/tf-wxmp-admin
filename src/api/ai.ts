@@ -100,6 +100,19 @@ export interface AIStatistics {
   model_stats: Record<string, number>;
 }
 
+// 定义接口类型
+export interface LLMConfig {
+  provider: string;
+  modelName: string;
+  baseUrl: string;
+  apiKey: string;
+  secretKey?: string | null;
+  temperature: number;
+  topP: number;
+  maxTokens: number;
+  extData?: Record<string, any>;
+}
+
 // API 方法定义
 export const aiApi = {
   // 模型管理
@@ -198,9 +211,17 @@ export const aiApi = {
     modelName: string;
     baseUrl: string;
     apiKey: string;
-    secretKey: string;
     region?: string;
     extData?: any;
   }) =>
     http.put<ApiResponse<null>>('/ai/ocr/config', data),
+
+  // 获取语言模型配置
+  getLLMConfig: () =>
+    http.get<ApiResponse<LLMConfig>>('/ai/llm/config'),
+
+  // 更新语言模型配置
+  updateLLMConfig: (data: LLMConfig) => {
+    return http.put<ApiResponse<null>>('/ai/llm/config', data);
+  }
 };

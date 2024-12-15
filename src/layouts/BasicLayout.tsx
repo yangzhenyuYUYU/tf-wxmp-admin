@@ -146,7 +146,7 @@ const BasicLayout = () => {
             icon: <RobotOutlined />,
             routes: [
               {
-                path: '/knowledge/bases',
+                path: '/knowledge/datasets',
                 name: '知识库',
               },
               {
@@ -171,6 +171,10 @@ const BasicLayout = () => {
               {
                 path: '/ai-settings/responses',
                 name: 'AI回复管理',
+              },
+              {
+                path: '/ai-settings/llm-models',
+                name: '语言模型管理',
               },
               {
                 path: '/ai-settings/ocr-models',

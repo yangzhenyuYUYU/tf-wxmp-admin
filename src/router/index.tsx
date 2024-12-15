@@ -17,13 +17,13 @@ const Materials = lazy(() => import('../pages/Knowledge/Materials'));
 const Slices = lazy(() => import('../pages/Knowledge/Slices'));
 const Datasets = lazy(() => import('../pages/Knowledge/Datasets'));
 const Processors = lazy(() => import('../pages/Knowledge/Processors'));
-const Bases = lazy(() => import('../pages/Knowledge/Bases'));
 const Settings = lazy(() => import('../pages/Knowledge/Settings'));
 const Models = lazy(() => import('../pages/AI/Models'));
 const Keys = lazy(() => import('../pages/AI/Keys'));
 const Consumption = lazy(() => import('../pages/AI/Consumption'));
 const Responses = lazy(() => import('../pages/AI/Responses'));
 const OCRModel = lazy(() => import('../pages/AI/OCRModel'));
+const LLMModel = lazy(() => import('../pages/AI/LLMModel'));
 
 // 根据错误提示,这些组件标红的原因是:
 // 1. 有些组件文件虽然创建了,但是没有正确导出默认导出(export default)
@@ -95,6 +95,10 @@ export const router = createBrowserRouter([
         path: 'ai-settings',
         children: [
           {
+            path: '',
+            element: <Navigate to="models" replace />,
+          },
+          {
             path: 'models',
             element: (
               <Suspense fallback={<div>加载中...</div>}>
@@ -134,6 +138,14 @@ export const router = createBrowserRouter([
               </Suspense>
             ),
           },
+          {
+            path: 'llm-models',
+            element: (
+              <Suspense fallback={<div>加载中...</div>}>
+                <LLMModel />
+              </Suspense>
+            ),
+          },
         ],
       },
       {
@@ -147,6 +159,10 @@ export const router = createBrowserRouter([
       {
         path: 'resources',
         children: [
+          {
+            path: '',
+            element: <Navigate to="emojis" replace />,
+          },
           {
             path: 'banners',
             element: (
@@ -168,6 +184,10 @@ export const router = createBrowserRouter([
       {
         path: 'knowledge',
         children: [
+          {
+            path: '',
+            element: <Navigate to="datasets" replace />,
+          },
           {
             path: 'materials',
             element: (
@@ -197,14 +217,6 @@ export const router = createBrowserRouter([
             element: (
               <Suspense fallback={<div>加载中...</div>}>
                 <Processors />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'bases',
-            element: (
-              <Suspense fallback={<div>加载中...</div>}>
-                <Bases />
               </Suspense>
             ),
           },

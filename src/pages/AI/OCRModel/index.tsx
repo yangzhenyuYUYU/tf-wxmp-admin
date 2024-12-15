@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Input, Select, Button, message, Space, Tooltip } from 'antd';
+import { Card, Form, Input, Select, Button, message, Space, Tooltip, Row, Col } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { aiApi } from '../../../api/ai';
 
@@ -59,7 +59,6 @@ const OCRModel: React.FC = () => {
       setLoading(true);
       const res = await aiApi.getOCRConfig();
       if (res.code === 0 && res.data) {
-        // 处理 extData，将对象转换为格式化的 JSON 字符串
         const formData = {
           ...res.data,
           extData: res.data.extData ? JSON.stringify(res.data.extData, null, 2) : undefined
@@ -83,7 +82,6 @@ const OCRModel: React.FC = () => {
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      // 处理 extData，将 JSON 字符串解析为对象
       const submitData = {
         ...values,
         extData: values.extData ? JSON.parse(values.extData) : undefined
@@ -96,7 +94,6 @@ const OCRModel: React.FC = () => {
         message.error(res.msg || '保存失败');
       }
     } catch (error) {
-      // 添加 JSON 解析错误的特殊处理
       if (error instanceof SyntaxError) {
         message.error('扩展参数 JSON 格式错误，请检查');
       } else {
@@ -107,7 +104,6 @@ const OCRModel: React.FC = () => {
     }
   };
 
-  // 添加 JSON 格式验证函数
   const validateJSON = (_: any, value: string) => {
     if (!value) {
       return Promise.resolve();
@@ -121,108 +117,113 @@ const OCRModel: React.FC = () => {
   };
 
   return (
-    <Card title="OCR模型配置" loading={loading}>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={handleSubmit}
-        style={{ maxWidth: 800 }}
-      >
-        <Form.Item
-          name="provider"
-          label="供应商"
-          rules={[{ required: true, message: '请选择供应商' }]}
+    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+      <Card title="OCR模型配置" loading={loading}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
         >
-          <Select
-            placeholder="请选择供应商"
-            onChange={handleProviderChange}
-            options={providers}
-          />
-        </Form.Item>
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item
+                name="provider"
+                label="供应商"
+                rules={[{ required: true, message: '请选择供应商' }]}
+              >
+                <Select
+                  placeholder="请选择供应商"
+                  onChange={handleProviderChange}
+                  options={providers}
+                />
+              </Form.Item>
+            </Col>
 
-        <Form.Item
-          name="modelName"
-          rules={[{ required: true, message: '请选择模型标识' }]}
-          label={
-            <Space>
-              模型标识
-              <Tooltip title="不同供应商支持的模型类型">
-                <QuestionCircleOutlined />
-              </Tooltip>
-            </Space>
-          }
-        >
-          <Select
-            placeholder="请选择模型标识"
-            options={providerModels[form.getFieldValue('provider')] || []}
-          />
-        </Form.Item>
+            <Col span={12}>
+              <Form.Item
+                name="modelName"
+                rules={[{ required: true, message: '请选择模型标识' }]}
+                label={
+                  <Space>
+                    模型标识
+                    <Tooltip title="不同供应商支持的模型类型">
+                      <QuestionCircleOutlined />
+                    </Tooltip>
+                  </Space>
+                }
+              >
+                <Select
+                  placeholder="请选择模型标识"
+                  options={providerModels[form.getFieldValue('provider')] || []}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Form.Item
-          name="baseUrl"
-          label="接口地址"
-          rules={[{ required: true, message: '请输入接口地址' }]}
-        >
-          <Input placeholder="请输入接口地址" />
-        </Form.Item>
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item
+                name="baseUrl"
+                label="接口地址"
+                rules={[{ required: true, message: '请输入接口地址' }]}
+              >
+                <Input placeholder="请输入接口地址" />
+              </Form.Item>
+            </Col>
 
-        <Form.Item
-          name="apiKey"
-          label="API Key"
-          rules={[{ required: true, message: '请输入API Key' }]}
-        >
-          <Input 
-            placeholder="请输入API Key"
-            type="text"
-          />
-        </Form.Item>
+            <Col span={12}>
+              <Form.Item
+                name="apiKey"
+                label="API Key"
+                rules={[{ required: true, message: '请输入API Key' }]}
+              >
+                <Input.Password 
+                  placeholder="请输入API Key"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        {/* <Form.Item
-          name="secretKey"
-          label="Secret Key"
-          rules={[{ required: true, message: '请输入Secret Key' }]}
-        >
-          <Input 
-            placeholder="请输入Secret Key"
-            type="text"
-          />
-        </Form.Item> */}
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item
+                name="region"
+                label="区域"
+                tooltip="部分供应商需要配置区域信息"
+              >
+                <Input placeholder="请输入区域信息" />
+              </Form.Item>
+            </Col>
+          </Row>
 
-        <Form.Item
-          name="region"
-          label="区域"
-          tooltip="部分供应商需要配置区域信息"
-        >
-          <Input placeholder="请输入区域信息" />
-        </Form.Item>
+          <Form.Item
+            name="extData"
+            label="扩展参数"
+            tooltip="JSON格式的额外配置参数"
+            rules={[
+              { validator: validateJSON }
+            ]}
+          >
+            <Input.TextArea 
+              rows={8} 
+              placeholder={`请输入JSON格式的扩展参数，例如：
+{
+  "key1": "value1",
+  "key2": {
+    "nestedKey": "nestedValue"
+  }
+}`}
+            />
+          </Form.Item>
 
-        <Form.Item
-          name="extData"
-          label="扩展参数"
-          tooltip="JSON格式的额外配置参数"
-          rules={[
-            { validator: validateJSON }
-          ]}
-        >
-          <Input.TextArea 
-            rows={8} 
-            placeholder={`请输入JSON格式的扩展参数，例如：
-            {
-            "key1": "value1",
-            "key2": {
-                "nestedKey": "nestedValue"
-            }
-            }`}
-          />
-        </Form.Item>
-
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            保存配置
-          </Button>
-        </Form.Item>
-      </Form>
-    </Card>
+          <Form.Item style={{ marginTop: 16, textAlign: 'right' }}>
+            <Button type="primary" htmlType="submit">
+              保存配置
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
   );
 };
 
