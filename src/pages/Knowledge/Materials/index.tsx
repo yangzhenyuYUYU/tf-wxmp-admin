@@ -87,15 +87,15 @@ const Materials: React.FC = () => {
         const { kb_url, kb_object_name, object_name, url, filename, size, content_type, resource_type, resource_name, description, path } = res.data
         setUploadedFile({
           url,
-          kb_url,
-          kb_object_name,
+          kb_url: kb_url || undefined,
+          kb_object_name: kb_object_name || undefined, 
           object_name,
           name: filename,
           size,
           content_type,
           resource_type,
           resource_name,
-          description,
+          description: description || undefined,
           path
         });
         return res.data.url;
@@ -200,10 +200,7 @@ const Materials: React.FC = () => {
         <a 
           href={record.file_url}
           style={{ 
-            textDecoration: 'none',
-            ':hover': {
-              textDecoration: 'underline'
-            }
+            textDecoration: 'none'
           }}
           target="_blank"
           rel="noopener noreferrer"

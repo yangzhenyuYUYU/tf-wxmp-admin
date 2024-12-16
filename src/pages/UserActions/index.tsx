@@ -1,7 +1,7 @@
 import { Card, DatePicker, Row, Col, Statistic, message } from 'antd';
 import { useState, useEffect } from 'react';
 import { analyticsApi, UserActions } from '../../api/analytics';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import ReactECharts from 'echarts-for-react';
 
 const { RangePicker } = DatePicker;
@@ -9,7 +9,7 @@ const { RangePicker } = DatePicker;
 const UserActionsPage = () => {
   const [loading, setLoading] = useState(false);
   const [actionData, setActionData] = useState<UserActions[]>([]);
-  const [dateRange, setDateRange] = useState([
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>([
     dayjs().subtract(7, 'day'),
     dayjs()
   ]);
@@ -139,7 +139,11 @@ const UserActionsPage = () => {
     extra={
       <RangePicker
         value={dateRange}
-        onChange={(dates) => dates && setDateRange(dates)}
+        onChange={(dates) => {
+          if (dates) {
+            setDateRange([dates[0] as Dayjs, dates[1] as Dayjs]);
+          }
+        }}
       />
     }
   >
@@ -187,7 +191,7 @@ const UserActionsPage = () => {
         <ReactECharts
           option={getEChartsOption()}
           style={{ height: 400 }}
-          loading={loading}
+          showLoading={loading}
         />
       </Card>
     </div>

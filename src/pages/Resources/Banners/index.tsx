@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Table, Button, Image, Switch, message, Modal, Form, Input, Upload } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { resourcesApi, Resource, ResourceStatus } from '../../../api/resources';
+import { resourcesApi, Resource, ResourceStatus, ResourceType, ResourceName } from '../../../api/resources';
 import styles from './index.module.less';
 
 const Banners = () => {
@@ -90,7 +90,7 @@ const Banners = () => {
     showUploadList: false,
     beforeUpload: async (file: File) => {
       try {
-        const { code, data } = await resourcesApi.uploadFile(file, 'banner', 'image', 'public');
+        const { code, data } = await resourcesApi.uploadFile(file, 'banner', ResourceType.IMAGE, ResourceName.BANNER);
         if (code === 0 && data) {
           const previousUrl = form.getFieldValue('path');
           if (previousUrl) {

@@ -76,6 +76,7 @@ export interface ResourceUpdate {
   description?: string;
   status?: string;
   name?: string;
+  type?: string;
 }
 
 export const resourcesApi = {

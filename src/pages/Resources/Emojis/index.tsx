@@ -6,6 +6,7 @@ import styles from './index.module.less';
 
 interface EmojiItem {
   id: number;
+  name: string;
   path: string;
   type: ResourceType;
   description: string;
@@ -176,7 +177,7 @@ const Emojis = () => {
       .map((f: any) => f.originFileObj);
     
     // 文件大小校验
-    const oversizeFiles = newFiles.filter(file => file.size / 1024 / 1024 > 2);
+    const oversizeFiles = newFiles.filter((file: File) => file.size / 1024 / 1024 > 2);
     if (oversizeFiles.length > 0) {
       message.error(`有 ${oversizeFiles.length} 个文件超过2MB限制`);
       // 清理所有状态
@@ -206,7 +207,7 @@ const Emojis = () => {
     previewUrls.forEach(url => URL.revokeObjectURL(url));
     
     // 创建新的预览URL
-    const newUrls = newFiles.map(file => URL.createObjectURL(file));
+    const newUrls = newFiles.map((file: File) => URL.createObjectURL(file));
     setPreviewUrls(newUrls);
     
     // 设置表单类型
@@ -587,7 +588,7 @@ const Emojis = () => {
               >
                 <Select 
                   placeholder="请选择表情类型"
-                  onChange={(newType: ResourceType) => {
+                  onChange={() => {
                     if (uploadFiles.length > 0) {
                       message.warning('请先清空已选图片后再切换类型');
                       // 将类型选择恢复到原来的值

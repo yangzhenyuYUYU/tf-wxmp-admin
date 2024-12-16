@@ -1,6 +1,11 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { message } from 'antd';
 
+// 添加一个标记来追踪是否正在处理401错误
+let isHandling401 = false;
+// 存储待处理的请求队列
+let pendingRequests: Array<() => void> = [];
+
 interface ApiResponse<T> {
   code: number;
   msg: string;
@@ -15,6 +20,13 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
+    // 如果正在处理401，则阻止新的请求
+    if (isHandling401) {
+      return new Promise((resolve, reject) => {
+        pendingRequests.push(() => reject({ message: '请求已取消' }));
+      });
+    }
+
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -41,12 +53,20 @@ request.interceptors.response.use(
     // 处理 HTTP 状态码错误
     switch (response?.status) {
       case 401:
-        message.error('请重新登录');
-        // 清除token并跳转登录页
-        setTimeout(() => {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
-        }, 1000);
+        if (!isHandling401) {
+          isHandling401 = true;
+          message.error('请重新登录');
+          
+          // 清除token并跳转登录页
+          setTimeout(() => {
+            localStorage.removeItem('token');
+            // 清空待处理的请求队列
+            pendingRequests.forEach(reject => reject());
+            pendingRequests = [];
+            window.location.href = '/login';
+            isHandling401 = false;
+          }, 1000);
+        }
         break;
       case 403:
         message.error('没有权限');

@@ -116,6 +116,12 @@ const OCRModel: React.FC = () => {
     }
   };
 
+  const getModelOptions = () => {
+    const provider = form.getFieldValue('provider') as keyof typeof providerModels;
+    // 根据供应商返回对应的模型列表
+    return provider ? providerModels[provider] : [];
+  };
+
   return (
     <div style={{ maxWidth: 1000, margin: '0 auto' }}>
       <Card title="OCR模型配置" loading={loading}>
@@ -154,7 +160,7 @@ const OCRModel: React.FC = () => {
               >
                 <Select
                   placeholder="请选择模型标识"
-                  options={providerModels[form.getFieldValue('provider')] || []}
+                  options={getModelOptions()}
                 />
               </Form.Item>
             </Col>
