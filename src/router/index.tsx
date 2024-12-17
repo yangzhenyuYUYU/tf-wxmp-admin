@@ -24,6 +24,7 @@ const Consumption = lazy(() => import('../pages/AI/Consumption'));
 const Responses = lazy(() => import('../pages/AI/Responses'));
 const OCRModel = lazy(() => import('../pages/AI/OCRModel'));
 const LLMModel = lazy(() => import('../pages/AI/LLMModel'));
+const Feedback = lazy(() => import('../pages/Feedback'));
 
 // 根据错误提示,这些组件标红的原因是:
 // 1. 有些组件文件虽然创建了,但是没有正确导出默认导出(export default)
@@ -147,6 +148,14 @@ export const router = createBrowserRouter([
             ),
           },
         ],
+      },
+      {
+        path: 'feedback',
+        element: (
+          <Suspense fallback={<div>加载中...</div>}>
+            <Feedback />
+          </Suspense>
+        ),
       },
       {
         path: 'user-actions',

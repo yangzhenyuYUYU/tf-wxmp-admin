@@ -69,6 +69,8 @@ const Emojis = () => {
 
   useEffect(() => {
     fetchEmojis(searchParams);
+    // 每次重新渲染列表时清空搜索表单
+    searchForm.resetFields();
   }, [pagination.current, pagination.pageSize, searchParams]);
 
   const fetchEmojis = async (params: SearchFormValues = {}) => {
@@ -124,15 +126,10 @@ const Emojis = () => {
 
         // 创建表情包记录
         const createPromises = uploadResults.map(result => {
-          const url = result.data.url;
-          // 根据URL后缀判断类型
-          const isAnimated = url.toLowerCase().match(/\.(gif|webp|apng)$/);
-          const type = isAnimated ? ResourceType.GIF : ResourceType.IMAGE;
-          
           return resourcesApi.addSticker({
-            url: url,
+            url: result.data.url,
             description: values.description,
-            type: type
+            type: values.type // 使用表单中选择的类型
           });
         });
 
@@ -216,10 +213,7 @@ const Emojis = () => {
 
   // 修改类型校验函数
   const validateFileType = (files: File[]) => {
-    // 重置当前选择的类型
-    const currentType = form.getFieldValue('type');
-    
-    if (!files.length) return { valid: false, type: currentType, message: '请选择文件' };
+    if (!files.length) return { valid: false, type: ResourceType.IMAGE, message: '请选择文件' };
 
     // 检查所有文件的类型
     const fileTypes = files.map(file => {
@@ -235,7 +229,7 @@ const Emojis = () => {
     if (invalidFiles.length > 0) {
       return {
         valid: false,
-        type: currentType,
+        type: ResourceType.IMAGE,
         message: `存在 ${invalidFiles.length} 个不支的文件格式`
       };
     }
@@ -247,7 +241,7 @@ const Emojis = () => {
     if (hasStaticImages && hasAnimatedImages) {
       return {
         valid: false,
-        type: currentType,
+        type: ResourceType.IMAGE,
         message: '不能同时上传静态图片和动态图片'
       };
     }

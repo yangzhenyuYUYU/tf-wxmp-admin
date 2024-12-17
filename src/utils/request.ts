@@ -22,11 +22,10 @@ request.interceptors.request.use(
   (config) => {
     // 如果正在处理401，则阻止新的请求
     if (isHandling401) {
-      return new Promise((resolve, reject) => {
-        pendingRequests.push(() => reject({ message: '请求已取消' }));
+      return new Promise((_, reject) => {
+        pendingRequests.push(() => reject(new Error('请求已取消')));
       });
     }
-
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

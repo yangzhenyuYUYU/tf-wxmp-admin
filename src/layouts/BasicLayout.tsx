@@ -9,7 +9,8 @@ import {
   PictureOutlined,
   NotificationOutlined,
   AppstoreOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  MessageOutlined
 } from '@ant-design/icons';
 import logo from '@/assets/logo.png';
 import { Button, Tag, Space, message } from 'antd';
@@ -109,6 +110,11 @@ const BasicLayout = () => {
             path: '/posts',
             name: '内容管理',
             icon: <FileTextOutlined />,
+          },
+          {
+            path: '/feedback',
+            name: '反馈管理',
+            icon: <MessageOutlined />,
           },
           {
             path: '/announcements',
