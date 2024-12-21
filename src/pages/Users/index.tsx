@@ -109,9 +109,9 @@ const Users = () => {
         <Tag color={
           role === UserRole.ADMIN ? 'red' :
           role === UserRole.TEACHER ? 'green' :
-          role === UserRole.PROFESSOR ? 'purple' :
-          role === UserRole.ASSISTANT ? 'orange' :
-          role === UserRole.RESEARCHER ? 'cyan' :
+          // role === UserRole.PROFESSOR ? 'purple' :
+          // role === UserRole.ASSISTANT ? 'orange' :
+          // role === UserRole.RESEARCHER ? 'cyan' :
           role === UserRole.STUDENT ? 'blue' :
           role === UserRole.USER ? 'default' :
           'default'
@@ -127,7 +127,7 @@ const Users = () => {
       width: 100,
       render: (status: AccountStatus) => (
         <Tag color={status === AccountStatus.NORMAL ? 'success' : 'error'}>
-          {status === AccountStatus.NORMAL ? '正常' : '已删除'}
+          {status === AccountStatus.NORMAL ? '正常' : '封禁'}
         </Tag>
       ),
     },
@@ -189,7 +189,7 @@ const Users = () => {
           <Form.Item name="status">
             <Select style={{ width: 120 }} allowClear placeholder="选择状态">
               <Option value={AccountStatus.NORMAL}>正常</Option>
-              <Option value={AccountStatus.REMOVE}>已删除</Option>
+              <Option value={AccountStatus.BAN}>封禁</Option>
             </Select>
           </Form.Item>
           <Form.Item>
@@ -250,7 +250,7 @@ const Users = () => {
           >
             <Select>
               <Option value={AccountStatus.NORMAL}>正常</Option>
-              <Option value={AccountStatus.REMOVE}>已删除</Option>
+              <Option value={AccountStatus.BAN}>封禁</Option>
             </Select> 
           </Form.Item>
           <Form.Item

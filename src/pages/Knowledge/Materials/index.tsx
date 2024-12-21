@@ -284,8 +284,18 @@ const Materials: React.FC = () => {
           layout="inline"
           onFinish={handleSearch}
         >
-          <Form.Item name="knowledge_base_name" label="知识库名称">
-            <Input placeholder="请输入知识库名称" />
+          <Form.Item name="dataset_id" label="知识库名称">
+            <Select 
+              style={{ width: 200 }} 
+              placeholder="请选择知识库"
+              allowClear
+            >
+              {knowledgeBases.map((kb: any) => (
+                <Select.Option key={kb.system_kb_id} value={kb.system_kb_id}>
+                  {kb.name}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item name="file_type" label="文件类型">
             <Select style={{ width: 120 }} allowClear>

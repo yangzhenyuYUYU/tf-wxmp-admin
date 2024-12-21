@@ -3,9 +3,9 @@ import { Card, Button, Space, Form, Input, InputNumber, Modal, message, Select, 
 import { PlusOutlined } from '@ant-design/icons';
 import { ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { categoryApi, Category, CategoryCreateParams } from '../../api/category';
-// 获取知识库
+import { categoryApi, Category, CategoryCreateParams, CategoryUpdateParams } from '../../api/category';
 import { knowledgeApi, KnowledgeBase } from '../../api/knowledge';
+import { User, userApi, UserRole } from '../../api/users';
 
 interface LevelStats {
   total_levels: number;
@@ -18,27 +18,53 @@ const CategoryList = () => {
   const [currentCategory, setCurrentCategory] = useState<Category>();
   const [form] = Form.useForm();
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
-  // 分页
   const actionRef = useRef<ActionType>();
-  // 获取知识库
+  const [teachers, setTeachers] = useState<User[]>([]);
+  const [selectedTeachers, setSelectedTeachers] = useState<number[]>([]);
+  const [bindModalVisible, setBindModalVisible] = useState(false);
+
+  // 获取知识库列表
   const fetchKnowledgeBases = useCallback(async () => {
-    const res = await knowledgeApi.getKnowledgeBases({ page: 1, size: 100 });
-    if (res.code === 0) {
-      setKnowledgeBases(res.data.items);
-    } else {
+    try {
+      const res = await knowledgeApi.getKnowledgeBases({ page: 1, size: 100 });
+      if (res.code === 0) {
+        setKnowledgeBases(res.data.items);
+      } else {
+        message.error('获取知识库列表失败');
+      }
+    } catch (error) {
       message.error('获取知识库列表失败');
     }
   }, []);
 
   useEffect(() => {
     fetchKnowledgeBases();
-  }, []);
+  }, [fetchKnowledgeBases]);
 
+  // 获取教师列表
+  const fetchTeachers = async () => {
+    try {
+      const res = await userApi.getUsers({ 
+        page: 1, 
+        size: 100,
+        role: UserRole.TEACHER 
+      });
+      if (res.code === 0) {
+        setTeachers(res.data.items);
+      }
+    } catch (error) {
+      message.error('获取教师列表失败');
+    }
+  };
+
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
 
   const columns: ProColumns<Category>[] = [
     {
       title: '名称',
-      dataIndex: 'name',
+      dataIndex: 'name'
     },
     {
       title: '标识',
@@ -60,24 +86,30 @@ const CategoryList = () => {
     },
     {
       title: '知识库',
-      dataIndex: 'is_bound_kb',
-      valueType: 'select',
-      valueEnum: {
-        0: { text: '未绑定' },
-        1: { text: '已绑定' },
-      },
+      dataIndex: 'knowledge_base_id',
       render: (_, record) => {
-        return record.knowledge_base_id ? (
-          <span style={{ color: '#52c41a' }}>已绑定</span>
+        const kb = knowledgeBases.find(kb => kb.id === record.knowledge_base_id);
+        return kb ? (
+          <Tag color="success">{kb.name}</Tag>
         ) : (
-          <span style={{ color: '#999' }}>未绑定</span>
+          <Tag color="default">未绑定</Tag>
         );
-      },
+      }
+    },
+    {
+      title: '答疑老师',
+      dataIndex: 'has_teachers',
+      render: (hasTeachers: boolean, record: Category) => (
+        <Tag color={hasTeachers ? 'success' : 'default'}>
+          {hasTeachers ? '已绑定' : '未绑定'}
+        </Tag>
+      ),
     },
     {
       title: '创建时间',
       dataIndex: 'created_at',
       valueType: 'dateTime',
+      sorter: true,
     },
     {
       title: '操作',
@@ -86,6 +118,12 @@ const CategoryList = () => {
       render: (_, record) => [
         <a key="edit" onClick={() => handleEdit(record)}>
           编辑
+        </a>,
+        <a 
+          key="bindTeacher" 
+          onClick={() => handleBindTeachers(record)}
+        >
+          绑定老师
         </a>,
         <Button 
           key="delete" 
@@ -101,11 +139,15 @@ const CategoryList = () => {
 
   const handleCreate = async (values: CategoryCreateParams) => {
     try {
-      await categoryApi.createCategory(values);
-      message.success('创建成功');
-      setCreateModalVisible(false);
-      actionRef.current?.reload();
-      form.resetFields();
+      const res = await categoryApi.createCategory(values);
+      if (res.code === 0) {
+        message.success('创建成功');
+        setCreateModalVisible(false);
+        actionRef.current?.reload();
+        form.resetFields();
+      } else {
+        message.error(res.msg || '创建失败');
+      }
     } catch (error) {
       message.error('创建失败');
     }
@@ -117,14 +159,18 @@ const CategoryList = () => {
     form.setFieldsValue(category);
   };
 
-  const handleUpdate = async (values: CategoryCreateParams) => {
+  const handleUpdate = async (values: CategoryUpdateParams) => {
     if (!currentCategory) return;
     try {
-      await categoryApi.updateCategory(currentCategory.id, values);
-      message.success('更新成功');
-      setEditModalVisible(false);
-      actionRef.current?.reload();
-      form.resetFields();
+      const res = await categoryApi.updateCategory(currentCategory.id, values);
+      if (res.code === 0) {
+        message.success('更新成功');
+        setEditModalVisible(false);
+        actionRef.current?.reload();
+        form.resetFields();
+      } else {
+        message.error(res.msg || '更新失败');
+      }
     } catch (error) {
       message.error('更新失败');
     }
@@ -136,14 +182,61 @@ const CategoryList = () => {
       content: `确定要删除分类"${category.name}"吗？`,
       onOk: async () => {
         try {
-          await categoryApi.deleteCategory(category.id);
-          message.success('删除成功');
-          actionRef.current?.reload();
+          const res = await categoryApi.deleteCategory(category.id);
+          if (res.code === 0) {
+            message.success('删除成功');
+            actionRef.current?.reload();
+          } else {
+            message.error(res.msg || '删除失败');
+          }
         } catch (error) {
           message.error('删除失败');
         }
       },
     });
+  };
+
+  const handleBindTeachers = async (category: Category) => {
+    try {
+      setCurrentCategory(category);
+      // 先获取当前分类的教师列表
+      const res = await categoryApi.getCategoryTeachers(category.id);
+      if (res.code === 0) {
+        setSelectedTeachers(res.data.map(teacher => teacher.id));
+      }
+      setBindModalVisible(true);
+    } catch (error) {
+      message.error('获取教师列表失败');
+    }
+  };
+
+  const handleConfirmBind = async () => {
+    if (!currentCategory) return;
+    
+    try {
+      console.log('Submitting teacher_ids:', selectedTeachers);
+      const res = await categoryApi.bindCategoryTeachers(
+        currentCategory.id, 
+        { 
+          teacher_ids: selectedTeachers.map(id => Number(id))
+        }
+      );
+      if (res.code === 0) {
+        message.success('绑定成功');
+        setBindModalVisible(false);
+        actionRef.current?.reload();
+      } else {
+        message.error(res.msg || '绑定失败');
+      }
+    } catch (error) {
+      message.error('绑定失败');
+    }
+  };
+
+  const handleCancelBind = () => {
+    setBindModalVisible(false);
+    setSelectedTeachers([]);
+    setCurrentCategory(null);
   };
 
   const LevelSelector: React.FC<{
@@ -167,9 +260,11 @@ const CategoryList = () => {
 
     const loadLevelStats = async () => {
       try {
-        const stats = await categoryApi.getCategoryStats();
-        if (stats.code === 0 && stats.data) {
-          setLevelStats(stats.data);
+        const res = await categoryApi.getCategoryStats();
+        if (res.code === 0 && res.data) {
+          setLevelStats(res.data);
+        } else {
+          message.error(res.msg || '加载层级统计失败');
         }
       } catch (error) {
         console.error('层级统计加载错误:', error);
@@ -177,22 +272,16 @@ const CategoryList = () => {
       }
     };
 
-    // 获取当前层级的最大可选值
     const getMaxNumber = (level: number) => {
       return (levelStats?.level_counts[level] || 0) + 1;
     };
 
-    // 验证输入值是否有效
     const isValidInput = () => {
-      // 获取当前要添加的层级
       const currentLevel = selectedKeys.length + 1;
-      // 检查输入值是否在有效范围内
-      return inputValue !== null && Number(inputValue) <= ((levelStats?.level_counts[currentLevel] || 0) + 1);
+      return inputValue !== null && Number(inputValue) <= getMaxNumber(currentLevel);
     };
 
-    // 处理追加层级
     const handleAppend = () => {
-      // 再次验证输入是否有效,防止按钮禁用状态下仍能触发
       if (!isValidInput() || !inputValue) return;
       const newKeys = [...selectedKeys, inputValue];
       setSelectedKeys(newKeys);
@@ -200,14 +289,12 @@ const CategoryList = () => {
       setInputValue(null);
     };
 
-    // 处理清空操作
     const handleClear = () => {
       setSelectedKeys([]);
       setInputValue(null);
       onChange?.('');
     };
 
-    // 处理标签删除
     const handleTagClose = (index: number) => {
       const newKeys = selectedKeys.slice(0, index);
       setSelectedKeys(newKeys);
@@ -216,12 +303,10 @@ const CategoryList = () => {
 
     return (
       <div className="flex flex-col gap-2">
-        {/* 当前标识预览 */}
         <div className="text-gray-600 text-sm">
           当前标识：{selectedKeys.length > 0 ? selectedKeys.join('-') : '请选择标识'}
         </div>
         
-        {/* 标签展示区 */}
         <div className="flex flex-wrap gap-1">
           {selectedKeys.map((key, index) => (
             <Tag
@@ -235,7 +320,6 @@ const CategoryList = () => {
           ))}
         </div>
 
-        {/* 输入区域 */}
         <Space.Compact style={{ width: '100%' }}>
           <InputNumber
             style={{ width: '100%' }}
@@ -289,11 +373,14 @@ const CategoryList = () => {
       <ProTable<Category>
         actionRef={actionRef}
         columns={columns}
+        search={false}
         request={async (params) => {
-          const { current, pageSize } = params;
+          const { current, pageSize, sort_field, sort_order } = params;
           const res = await categoryApi.getCategories({
             page: current || 1,
             size: pageSize || 20,
+            sort_field,
+            sort_order,
           });
           
           return {
@@ -316,7 +403,6 @@ const CategoryList = () => {
           ],
         }}
         rowKey="id"
-        search={false}
       />
 
       <Modal
@@ -354,6 +440,18 @@ const CategoryList = () => {
               <Select.Option value={50}>50</Select.Option>
             </Select>
           </Form.Item>
+          <Form.Item
+            name="knowledge_base_id"
+            label="知识库"
+          >
+            <Select allowClear>
+              {knowledgeBases?.map(kb => (
+                <Select.Option key={kb.id} value={kb.id}>
+                  {kb.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Form>
       </Modal>
 
@@ -365,19 +463,6 @@ const CategoryList = () => {
         destroyOnClose
       >
         <Form form={form} onFinish={handleUpdate}>
-          <Form.Item
-            name="knowledge_base_id"
-            label="知识库"
-            rules={[{ required: true, message: '请选择知识库' }]}
-          >
-            <Select>
-              {knowledgeBases?.map(kb => (
-                <Select.Option key={kb.id} value={kb.id}>
-                  {kb.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
           <Form.Item
             name="name"
             label="名称"
@@ -405,10 +490,54 @@ const CategoryList = () => {
               <Select.Option value={50}>50</Select.Option>
             </Select>
           </Form.Item>
+          <Form.Item
+            name="knowledge_base_id"
+            label="知识库"
+          >
+            <Select allowClear>
+              {knowledgeBases?.map(kb => (
+                <Select.Option key={kb.id} value={kb.id}>
+                  {kb.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title="绑定答疑老师"
+        open={bindModalVisible}
+        onOk={handleConfirmBind}
+        onCancel={handleCancelBind}
+        width={500}
+        maskClosable={false}
+      >
+        <div style={{ marginTop: 16, marginBottom: 16 }}>
+          <Select
+            mode="multiple"
+            style={{ width: '100%' }}
+            placeholder="请选择答疑老师"
+            value={selectedTeachers}
+            onChange={(values: number[]) => {
+              console.log('Selected values:', values);
+              setSelectedTeachers(values);
+            }}
+            options={teachers.map(teacher => ({
+              label: teacher.nickname || teacher.real_name || teacher.user_id,
+              value: teacher.id,
+              key: teacher.id
+            }))}
+            allowClear
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+          />
+        </div>
       </Modal>
     </Card>
   );
 };
 
-export default CategoryList; 
+export default CategoryList;

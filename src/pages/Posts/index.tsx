@@ -91,7 +91,7 @@ const Posts = () => {
   const columns: ColumnsType<PostItem> = [
     {
       title: 'ID',
-      dataIndex: 'id',
+      dataIndex: 'id', 
       width: 80,
     },
     {
@@ -100,12 +100,25 @@ const Posts = () => {
       ellipsis: true,
     },
     {
-      title: '作者',
-      dataIndex: ['user', 'nickname'],
-      width: 120,
+      title: '分类',
+      dataIndex: 'categories',
+      width: 150,
+      render: (categories: { id: number; name: string; key: string }[]) => (
+        <Space>
+          {categories.map(category => (
+            <Tag key={category.id}>{category.name}</Tag>
+          ))}
+        </Space>
+      )
     },
     {
-      title: '精华',
+      title: '作者',
+      dataIndex: ['user', 'nickname'],
+      ellipsis: true,
+      width: 130,
+    },
+    {
+      title: '品质',
       dataIndex: 'is_excellent',
       width: 80,
       render: (isExcellent: boolean) => (

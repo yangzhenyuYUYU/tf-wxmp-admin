@@ -13,6 +13,7 @@ export interface Category {
   sort_order: number;
   created_at?: string;
   updated_at?: string;
+  has_teachers: boolean;
   knowledge_base_id?: number | string;
 }
 
@@ -36,6 +37,15 @@ export interface CategoryUpdateParams {
 export interface LevelStats {
   total_levels: number;
   level_counts: Record<string, number>;
+}
+
+export interface Teacher {
+  id: number;
+  user_id: number;
+  nickname: string;
+  real_name: string;
+  avatar: string;
+  is_active: boolean;
 }
 
 export const categoryApi = {
@@ -76,4 +86,12 @@ export const categoryApi = {
   getLevelStats: () => {
     return http.get<ApiResponse<LevelStats>>('/api/categories/stats');
   },
+
+  // 绑定教师到分类
+  bindCategoryTeachers: (categoryId: number, data: { teacher_ids: number[] }) =>
+    http.post<ApiResponse<null>>(`/categories/${categoryId}/teachers`, data),
+
+  // 获取分类下的教师列表
+  getCategoryTeachers: (categoryId: number) =>
+    http.get<ApiResponse<Teacher[]>>(`/categories/${categoryId}/teachers`),
 }; 

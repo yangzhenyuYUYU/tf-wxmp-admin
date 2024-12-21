@@ -3,28 +3,29 @@ import { ApiResponse, http } from '../utils/request';
 export enum UserRole {
   STUDENT = 'student',
   TEACHER = 'teacher',
-  PROFESSOR = 'professor',
+  // PROFESSOR = 'professor',
   ADMIN = 'admin',
-  ASSISTANT = 'assistant',
-  RESEARCHER = 'researcher',
+  // ASSISTANT = 'assistant',
+  // RESEARCHER = 'researcher',
   USER = 'user',
-  DEFAULT = 'default'
+  // DEFAULT = 'default'
 }
 
 export enum UserRoleLabel {
-  STUDENT = '学生',
-  TEACHER = '教师',
+  STUDENT = '认证学生',
+  TEACHER = '答疑老师',
   PROFESSOR = '教授',
   ADMIN = '管理员',
   ASSISTANT = '助教',
   RESEARCHER = '研究员',
   USER = '普通用户',
-  DEFAULT = '默认用户'
+  DEFAULT = '普通用户'
 }
 
 export enum AccountStatus {
   NORMAL = 1,
-  REMOVE = -1
+  REMOVE = -1,
+  BAN = 0
 }
 
 export interface User {
