@@ -31,6 +31,7 @@ export interface CategoryCreateParams {
 export interface CategoryUpdateParams {
   name?: string;
   key?: string;
+  knowledge_base_id?: number | string;
   sort_order?: number;
 }
 

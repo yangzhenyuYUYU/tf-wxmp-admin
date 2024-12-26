@@ -5,12 +5,21 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authApi, RegisterParams } from '../../api/auth';
 import styles from './index.module.less';
 import logo from '../../assets/logo.png';
+import ImageCaptcha from '../../components/ImageCaptcha';
+
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [captchaCode, setCaptchaCode] = useState('');
 
-  const onFinish = async (values: RegisterParams) => {
+  const onFinish = async (values: RegisterParams & { captcha: string }) => {
+    if (values.captcha.toLowerCase() !== captchaCode.toLowerCase()) {
+      message.error('验证码错误');
+      return;
+    }
+
     setLoading(true);
     try {
       const { code, data } = await authApi.register(values);
@@ -19,7 +28,7 @@ const Register = () => {
       if (!data || code !== 0) return;
       
       message.success('注册成功');
-      navigate('/login', { replace: true });
+      navigate(`${BASE_PATH}/login`, { replace: true });
       
     } catch (error: any) {
       console.error('注册失败:', error);
@@ -92,6 +101,26 @@ const Register = () => {
             />
           </Form.Item>
 
+          <Form.Item
+            name="captcha"
+            rules={[{ required: true, message: '请输入验证码!' }]}
+          >
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Input 
+                placeholder="请输入验证码" 
+                style={{ flex: 1 }}
+                disabled={loading}
+              />
+              <div style={{ marginLeft: 8 }}>
+                <ImageCaptcha
+                  width={120}
+                  height={40}
+                  onChange={(code) => setCaptchaCode(code)}
+                />
+              </div>
+            </div>
+          </Form.Item>
+
           <Form.Item>
             <Button 
               type="primary" 
@@ -107,7 +136,7 @@ const Register = () => {
 
         <div className={styles.footer}>
           已有账号？
-          <Link to="/login" className={styles.link}>
+          <Link to={`${BASE_PATH}/login`} className={styles.link}>
             立即登录
           </Link>
         </div>
@@ -116,4 +145,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default Register;

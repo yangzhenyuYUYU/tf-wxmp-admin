@@ -99,9 +99,9 @@ const CategoryList = () => {
     {
       title: '答疑老师',
       dataIndex: 'has_teachers',
-      render: (hasTeachers: boolean, record: Category) => (
-        <Tag color={hasTeachers ? 'success' : 'default'}>
-          {hasTeachers ? '已绑定' : '未绑定'}
+      render: (_, entity) => (
+        <Tag color={entity.has_teachers ? 'success' : 'default'}>
+          {entity.has_teachers ? '已绑定' : '未绑定'}
         </Tag>
       ),
     },
@@ -236,7 +236,7 @@ const CategoryList = () => {
   const handleCancelBind = () => {
     setBindModalVisible(false);
     setSelectedTeachers([]);
-    setCurrentCategory(null);
+    setCurrentCategory(undefined);
   };
 
   const LevelSelector: React.FC<{

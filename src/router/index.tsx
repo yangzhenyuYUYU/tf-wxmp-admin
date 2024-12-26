@@ -25,19 +25,17 @@ const Responses = lazy(() => import('../pages/AI/Responses'));
 const OCRModel = lazy(() => import('../pages/AI/OCRModel'));
 const LLMModel = lazy(() => import('../pages/AI/LLMModel'));
 const Feedback = lazy(() => import('../pages/Feedback'));
+const TeacherList = lazy(() => import('../pages/TeacherList'));
 
-// 根据错误提示,这些组件标红的原因是:
-// 1. 有些组件文件虽然创建了,但是没有正确导出默认导出(export default)
-// 2. 有些组件文件可能不存在或TypeScript找不到对应的类型声明
-// 
-// 解决方案:
-// 1. 确保所有组件文件都有 export default 导出
-// 2. 检查文件路径是否正确
-// 3. 如果是 TypeScript 项目,需要有正确的类型声明
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
 
 export const router = createBrowserRouter([
   {
-    path: '/login',
+    path: '/',
+    element: <Navigate to={`${BASE_PATH}`} replace />,
+  },
+  {
+    path: `${BASE_PATH}/login`,
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <Login />
@@ -45,7 +43,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/register',
+    path: `${BASE_PATH}/register`,
     element: (
       <Suspense fallback={<div>加载中...</div>}>
         <Register />
@@ -53,12 +51,12 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/',
+    path: `${BASE_PATH}`,
     element: <BasicLayout />,
     children: [
       {
-        path: '/',
-        element: <Navigate to="/dashboard" replace />,
+        path: '',
+        element: <Navigate to={`${BASE_PATH}/dashboard`} replace />,
       },
       {
         path: 'dashboard',
@@ -252,6 +250,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<div>加载中...</div>}>
             <Categories />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'teachers',
+        element: (
+          <Suspense fallback={<div>加载中...</div>}>
+            <TeacherList />
           </Suspense>
         ),
       },

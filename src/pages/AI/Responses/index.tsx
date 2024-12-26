@@ -159,6 +159,8 @@ const Responses: React.FC = () => {
         setResponses(res.data.items);
         setPagination({
           ...pagination,
+          current: params.current || pagination.current,
+          pageSize: params.pageSize || pagination.pageSize,
           total: res.data.total
         });
       } else {
@@ -171,10 +173,10 @@ const Responses: React.FC = () => {
     }
   };
 
-  const handleTableChange: TableProps<AIResponse>['onChange'] = (pagination) => {
+  const handleTableChange: TableProps<AIResponse>['onChange'] = (paginationParams) => {
     fetchResponses({
-      current: pagination.current,
-      pageSize: pagination.pageSize,
+      current: paginationParams.current,
+      pageSize: paginationParams.pageSize,
     });
   };
 
@@ -235,12 +237,7 @@ const Responses: React.FC = () => {
         dataSource={responses}
         rowKey="id"
         loading={loading}
-        pagination={{
-          ...pagination,
-          showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total) => `共 ${total} 条`
-        }}
+        pagination={pagination}
         onChange={handleTableChange}
       />
 

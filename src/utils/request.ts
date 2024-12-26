@@ -1,6 +1,8 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { message } from 'antd';
 
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
+
 // 添加一个标记来追踪是否正在处理401错误
 let isHandling401 = false;
 // 存储待处理的请求队列
@@ -62,7 +64,7 @@ request.interceptors.response.use(
             // 清空待处理的请求队列
             pendingRequests.forEach(reject => reject());
             pendingRequests = [];
-            window.location.href = '/login';
+            window.location.href = `${BASE_PATH}/login`;
             isHandling401 = false;
           }, 1000);
         }
@@ -71,7 +73,7 @@ request.interceptors.response.use(
         message.error('没有权限');
         setTimeout(() => {
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          window.location.href = `${BASE_PATH}/login`;
         }, 1000);
         break;
       case 404:

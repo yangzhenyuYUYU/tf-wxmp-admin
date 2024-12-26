@@ -5,12 +5,20 @@ import { authApi, LoginParams } from '../../api/auth';
 import styles from './index.module.less';
 import { useState } from 'react';
 import logo from '../../assets/logo.png';
+import ImageCaptcha from '../../components/ImageCaptcha';
 
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [captchaCode, setCaptchaCode] = useState('');
 
-  const onFinish = async (values: LoginParams) => {
+  const onFinish = async (values: LoginParams & { captcha: string }) => {
+    if (values.captcha.toLowerCase() !== captchaCode.toLowerCase()) {
+      message.error('验证码错误');
+      return;
+    }
+    
     setLoading(true);
     try {
       const { code, data } = await authApi.login(values);
@@ -24,7 +32,7 @@ const Login = () => {
       localStorage.setItem('userInfo', JSON.stringify(admin_info));
       localStorage.setItem('system_token', system_token);
       message.success('登录成功');
-      navigate('/', { replace: true });
+      navigate(`/`, { replace: true });
       
     } catch (error: any) {
       console.error('登录失败:', error);
@@ -69,6 +77,26 @@ const Login = () => {
             />
           </Form.Item>
 
+          <Form.Item
+            name="captcha"
+            rules={[{ required: true, message: '请输入验证码!' }]}
+          >
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Input 
+                placeholder="请输入验证码" 
+                style={{ flex: 1 }}
+                disabled={loading}
+              />
+              <div style={{ marginLeft: 8 }}>
+                <ImageCaptcha
+                  width={120}
+                  height={40}
+                  onChange={(code) => setCaptchaCode(code)}
+                />
+              </div>
+            </div>
+          </Form.Item>
+
           <Form.Item>
             <Button 
               type="primary" 
@@ -84,7 +112,7 @@ const Login = () => {
 
         <div className={styles.footer}>
           还没有账号？
-          <Link to="/register" className={styles.link}>
+          <Link to={`${BASE_PATH}/register`} className={styles.link}>
             立即注册
           </Link>
         </div>

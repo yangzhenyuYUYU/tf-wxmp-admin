@@ -1,3 +1,5 @@
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
+
 import { ProLayout } from '@ant-design/pro-components';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
@@ -24,7 +26,7 @@ const BasicLayout = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     message.success('退出登录成功');
-    navigate('/login');
+    navigate(`${BASE_PATH}/login`);
   };
 
   return (
@@ -79,123 +81,128 @@ const BasicLayout = () => {
         ];
       }}
       menuItemRender={(item, dom) => (
-        <Link to={item.path || '/'}>{dom}</Link>
+        <Link to={item.path || `${BASE_PATH}/`}>{dom}</Link>
       )}
       breadcrumbRender={(routers = []) => [
         {
-          path: '/',
+          path: `${BASE_PATH}/`,
           title: '首页',
         },
         ...routers,
       ]}
       route={{
-        path: '/',
+        path: `${BASE_PATH}/`,
         routes: [
           {
-            path: '/dashboard',
+            path: `${BASE_PATH}/dashboard`,
             name: '控制台',
             icon: <DashboardOutlined />,
           },
           {
-            path: '/users',
+            path: `${BASE_PATH}/users`,
             name: '用户管理',
             icon: <TeamOutlined />,
           },
           {
-            path: '/admin',
+            path: `${BASE_PATH}/admin`,
             name: '管理员管理',
             icon: <TeamOutlined />,
           },
           {
-            path: '/posts',
+            path: `${BASE_PATH}/posts`,
             name: '内容管理',
             icon: <FileTextOutlined />,
           },
           {
-            path: '/feedback',
+            path: `${BASE_PATH}/feedback`,
             name: '反馈管理',
             icon: <MessageOutlined />,
           },
           {
-            path: '/announcements',
+            path: `${BASE_PATH}/announcements`,
             name: '公告通知',
             icon: <NotificationOutlined />,
           },
           {
-            path: '/user-actions',
+            path: `${BASE_PATH}/user-actions`,
             name: '用户操作',
             icon: <InteractionOutlined />,
           },
           {
-            path: '/categories',
+            path: `${BASE_PATH}/categories`,
             name: '分类管理',
             icon: <AppstoreOutlined />,
           },
           {
-            path: '/resources',
+            path: `${BASE_PATH}/resources`,
             name: '资源管理',
             icon: <PictureOutlined />,
             routes: [
               {
-                path: '/resources/emojis',
+                path: `${BASE_PATH}/resources/emojis`,
                 name: '表情包管理',
               },
               {
-                path: '/resources/banners',
+                path: `${BASE_PATH}/resources/banners`,
                 name: '轮播图管理',
               },
             ],
           },
           {
-            path: '/knowledge',
+            path: `${BASE_PATH}/knowledge`,
             name: 'AI知识库',
             icon: <RobotOutlined />,
             routes: [
               {
-                path: '/knowledge/datasets',
+                path: `${BASE_PATH}/knowledge/datasets`,
                 name: '知识库',
               },
               {
-                path: '/knowledge/slices',
+                path: `${BASE_PATH}/knowledge/slices`,
                 name: '切片库',
               },
               {
-                path: '/knowledge/materials',
+                path: `${BASE_PATH}/knowledge/materials`,
                 name: '资料库',
               },
               {
-                path: '/knowledge/settings',
+                path: `${BASE_PATH}/knowledge/settings`,
                 name: '高级设置',
               }
             ],
           },
           {
-            path: '/ai-settings',
+            path: `${BASE_PATH}/ai-settings`,
             name: 'AI信息管理',
             icon: <RobotOutlined />,
             routes: [
               {
-                path: '/ai-settings/responses',
+                path: `${BASE_PATH}/ai-settings/responses`,
                 name: 'AI回复管理',
               },
               {
-                path: '/ai-settings/llm-models',
+                path: `${BASE_PATH}/ai-settings/llm-models`,
                 name: '语言模型管理',
               },
               {
-                path: '/ai-settings/ocr-models',
+                path: `${BASE_PATH}/ai-settings/ocr-models`,
                 name: '图像识别模型',
               },
               {
-                path: '/ai-settings/models',
+                path: `${BASE_PATH}/ai-settings/models`,
                 name: '知识库模型管理',
               },
               // {
-              //   path: '/ai-settings/consumption',
+              //   path: `${BASE_PATH}/ai-settings/consumption`,
               //   name: 'AI消费统计',
               // },
 
             ],
+          },
+          {
+            path: `${BASE_PATH}/teachers`,
+            name: '教师管理',
+            icon: <TeamOutlined />,
           },
         ],
       }}
