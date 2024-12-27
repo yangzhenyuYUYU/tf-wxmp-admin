@@ -22,6 +22,8 @@ import { adminApi, AdminInfo } from '../../api/admin';
 import { announcementApi, Announcement } from '../../api/announcement';
 import styles from './index.module.less';
 
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const userActionChartRef = useRef<HTMLDivElement>(null);
@@ -48,7 +50,7 @@ const Dashboard = () => {
     {
       title: '用户数据',
       icon: <TeamOutlined className={styles.statIcon} />,
-      path: '/users',
+      path: `${BASE_PATH}/users`,
       stats: [
         { 
           title: '总用户数', 
@@ -66,7 +68,7 @@ const Dashboard = () => {
     {
       title: '内容数据',
       icon: <FileTextOutlined className={styles.statIcon} />,
-      path: '/posts',
+      path: `${BASE_PATH}/posts`,
       stats: [
         { 
           title: '总帖子数', 
@@ -84,7 +86,7 @@ const Dashboard = () => {
     {
       title: 'AI助手',
       icon: <RobotOutlined className={styles.statIcon} />,
-      path: '/ai-settings/models',
+      path: `${BASE_PATH}/ai-settings/models`,
       stats: [
         { 
           title: 'AI回复总数', 
@@ -102,7 +104,7 @@ const Dashboard = () => {
     {
       title: '知识库',
       icon: <BookOutlined className={styles.statIcon} />,
-      path: '/knowledge/materials',
+      path: `${BASE_PATH}/knowledge/materials`,
       stats: [
         { 
           title: '知识条目', 
@@ -290,7 +292,7 @@ const Dashboard = () => {
         <Col span={14}>
           <Card 
             title="用户行为趋势" 
-            extra={<a onClick={() => navigate('/user-actions')}>详情</a>}
+            extra={<a onClick={() => navigate(`${BASE_PATH}/user-actions`)}>详情</a>}
             bodyStyle={{ padding: '12px' }}
           >
             <div ref={userActionChartRef} style={{ height: 260 }} />
@@ -298,7 +300,7 @@ const Dashboard = () => {
               <Col span={12}>
                 <Card 
                   title={<><NotificationOutlined /> 最新公告</>}
-                  extra={<a onClick={() => navigate('/announcements')}>更多</a>}
+                  extra={<a onClick={() => navigate(`${BASE_PATH}/announcements`)}>更多</a>}
                   bodyStyle={{ padding: '8px 12px' }}
                 >
                   <List
@@ -320,7 +322,7 @@ const Dashboard = () => {
               <Col span={12}>
                 <Card 
                   title={<><TeamOutlined /> 管理员概况</>}
-                  extra={<a onClick={() => navigate('/admin')}>更多</a>}
+                  extra={<a onClick={() => navigate(`${BASE_PATH}/admin`)}>更多</a>}
                   bodyStyle={{ padding: '8px 12px' }}
                 >
                   <List
@@ -348,7 +350,7 @@ const Dashboard = () => {
             <Col span={24}>
               <Card 
                 title="活跃用户" 
-                extra={<a onClick={() => navigate('/users')}>更多</a>}
+                extra={<a onClick={() => navigate(`${BASE_PATH}/users`)}>更多</a>}
                 bodyStyle={{ padding: '8px 12px' }}
               >
                 <List
@@ -369,7 +371,7 @@ const Dashboard = () => {
             <Col span={24}>
               <Card 
                 title="热门内容" 
-                extra={<a onClick={() => navigate('/posts')}>更多</a>}
+                extra={<a onClick={() => navigate(`${BASE_PATH}/posts`)}>更多</a>}
                 bodyStyle={{ padding: '8px 12px' }}
               >
                 <List

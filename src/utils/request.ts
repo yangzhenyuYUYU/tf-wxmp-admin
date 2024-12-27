@@ -19,6 +19,33 @@ const request = axios.create({
   timeout: 10000,
 });
 
+// 添加 CryptoUtil
+class CryptoUtil {
+  private static key = import.meta.env.VITE_AES_KEY;
+
+  static encrypt(data: any): string {
+    const jsonStr = JSON.stringify(data);
+    // 使用 key 进行简单的混淆
+    const encodedKey = btoa(this.key);
+    const encodedData = btoa(jsonStr);
+    return btoa(encodedKey + encodedData); // 组合 key 和数据
+  }
+
+  static decrypt(encrypted: string): any {
+    try {
+        const decodedStr = atob(encrypted);
+        const encodedKey = btoa(this.key);
+        // 移除 key 部分
+        const encodedData = decodedStr.substring(encodedKey.length);
+        const jsonStr = atob(encodedData);
+        return JSON.parse(jsonStr);
+    } catch (error) {
+        console.error('解密失败:', error);
+        return null;
+    }
+  }
+}
+
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
@@ -28,6 +55,14 @@ request.interceptors.request.use(
         pendingRequests.push(() => reject(new Error('请求已取消')));
       });
     }
+
+    // 修改这里：使用 CryptoUtil 加密
+    if (config.data && typeof config.data === 'object') {
+        config.data = {
+            encrypted: CryptoUtil.encrypt(config.data)
+        };
+    }
+
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -46,6 +81,15 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
+    // 修改这里：使用 CryptoUtil 解密
+    if (response.data && response.data.encrypted) {
+        try {
+            return CryptoUtil.decrypt(response.data.encrypted);
+        } catch (error) {
+            console.error('解密响应数据失败:', error);
+            return response.data;
+        }
+    }
     return response.data;
   },
   (error) => {

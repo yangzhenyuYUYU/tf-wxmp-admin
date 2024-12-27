@@ -13,6 +13,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [captchaCode, setCaptchaCode] = useState('');
+  const [captchaRefreshTrigger, setCaptchaRefreshTrigger] = useState(0);
 
   const onFinish = async (values: RegisterParams & { captcha: string }) => {
     if (values.captcha.toLowerCase() !== captchaCode.toLowerCase()) {
@@ -24,6 +25,12 @@ const Register = () => {
     try {
       const { code, data } = await authApi.register(values);
       console.log('注册响应:', { code, data });
+      
+      if (code === 2) {
+        message.error('用户名已存在');
+        setCaptchaRefreshTrigger(prev => prev + 1);
+        return;
+      }
       
       if (!data || code !== 0) return;
       
@@ -116,6 +123,7 @@ const Register = () => {
                   width={120}
                   height={40}
                   onChange={(code) => setCaptchaCode(code)}
+                  key={captchaRefreshTrigger}
                 />
               </div>
             </div>

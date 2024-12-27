@@ -72,7 +72,7 @@ const TeacherList = () => {
       title: '回答率',
       dataIndex: 'response_rate',
       key: 'response_rate',
-      render: (rates) => `${(rates[timeRange] * 100).toFixed(2)}%`,
+      render: (rates) => `${(rates[timeRange]).toFixed(2)}%`,
     },
     {
       title: '平均等待时间',
