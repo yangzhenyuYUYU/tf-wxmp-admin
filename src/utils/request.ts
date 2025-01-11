@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { message } from 'antd';
+import { AESUtil } from './aes';
 
 const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
 
@@ -19,33 +20,6 @@ const request = axios.create({
   timeout: 10000,
 });
 
-// 添加 CryptoUtil
-class CryptoUtil {
-  private static key = import.meta.env.VITE_AES_KEY;
-
-  static encrypt(data: any): string {
-    const jsonStr = JSON.stringify(data);
-    // 使用 key 进行简单的混淆
-    const encodedKey = btoa(this.key);
-    const encodedData = btoa(jsonStr);
-    return btoa(encodedKey + encodedData); // 组合 key 和数据
-  }
-
-  static decrypt(encrypted: string): any {
-    try {
-        const decodedStr = atob(encrypted);
-        const encodedKey = btoa(this.key);
-        // 移除 key 部分
-        const encodedData = decodedStr.substring(encodedKey.length);
-        const jsonStr = atob(encodedData);
-        return JSON.parse(jsonStr);
-    } catch (error) {
-        console.error('解密失败:', error);
-        return null;
-    }
-  }
-}
-
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
@@ -56,11 +30,13 @@ request.interceptors.request.use(
       });
     }
 
-    // 修改这里：使用 CryptoUtil 加密
-    if (config.data && typeof config.data === 'object') {
+    // 对非上传请求进行加密
+    if (config.url && !config.url.startsWith('/upload')) {
+      if (config.data && typeof config.data === 'object') {
         config.data = {
-            encrypted: CryptoUtil.encrypt(config.data)
+          encrypted: AESUtil.encrypt(config.data)
         };
+      }
     }
 
     const token = localStorage.getItem('token');
@@ -81,14 +57,16 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
-    // 修改这里：使用 CryptoUtil 解密
-    if (response.data && response.data.encrypted) {
+    // 对非上传请求进行解密
+    if (response.config.url && !response.config.url.startsWith('/upload')) {
+      if (response.data && response.data.encrypted) {
         try {
-            return CryptoUtil.decrypt(response.data.encrypted);
+          return AESUtil.decrypt(response.data.encrypted);
         } catch (error) {
-            console.error('解密响应数据失败:', error);
-            return response.data;
+          console.error('解密响应数据失败:', error);
+          return response.data;
         }
+      }
     }
     return response.data;
   },

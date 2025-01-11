@@ -1,93 +1,80 @@
-import * as CryptoJS from 'crypto-js';
-
-const KEY = 'tf_xzs_admin';
+import CryptoJS from 'crypto-js';
+import seedrandom from 'seedrandom';
 
 export class AESUtil {
-    /**
-     * ECB 模式加密
-     * @param src 源文本
-     */
-    static encryptECB(src: string) {
-        const key = CryptoJS.enc.Utf8.parse(KEY);
-        const encrypted = CryptoJS.AES.encrypt(src, key, {
-            mode: CryptoJS.mode.ECB,
-            padding: CryptoJS.pad.Pkcs7
-        });
-        return encrypted.toString();
+    private static key = 'tff-32243f8e-5404-42bd-b52e-16be';
+    private static rng = seedrandom(AESUtil.key); // 使用密钥作为种子
+
+    // 自定义随机数生成器
+    static {
+        CryptoJS.lib.WordArray.random = (nBytes: number) => {
+            const words = [];
+            for (let i = 0; i < nBytes; i++) {
+                words.push(Math.floor(this.rng() * 0x100000000)); // 添加Math.floor确保整数
+            }
+            return CryptoJS.lib.WordArray.create(words, nBytes);
+        };
     }
 
-    /**
-     * ECB 模式解密
-     * @param src 加密文本
-     */
-    static decryptECB(src: string) {
-        const key = CryptoJS.enc.Utf8.parse(KEY);
-        const decrypted = CryptoJS.AES.decrypt(src, key, {
-            mode: CryptoJS.mode.ECB,
-            padding: CryptoJS.pad.Pkcs7
-        });
-        return decrypted.toString(CryptoJS.enc.Utf8);
+    static encrypt(data: any): string | null {
+        try {
+            // 生成随机初始向量
+            const iv = CryptoJS.lib.WordArray.random(16);
+            // 将密钥转换为 WordArray 格式
+            const keyWords = CryptoJS.enc.Utf8.parse(this.key);
+            
+            // 加密数据
+            const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), keyWords, {
+                iv: iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
+            });
+
+            // 将 IV 和密文组合成一个对象并转为 base64
+            const result = {
+                iv: CryptoJS.enc.Base64.stringify(iv),
+                ciphertext: encrypted.toString()
+            };
+
+            // 使用 btoa 进行 base64 编码，与后端保持一致
+            return btoa(JSON.stringify(result));
+        } catch (error) {
+            console.error('加密失败:', error instanceof Error ? error.message : String(error));
+            return null;
+        }
     }
 
-    /**
-     * CBC 模式加密
-     * @param src 源文本
-     */
-    static encryptCBC(src: string) {
-        const key = CryptoJS.enc.Utf8.parse(KEY);
-        const iv = CryptoJS.enc.Utf8.parse(KEY); // 使用相同的key作为iv
-        const encrypted = CryptoJS.AES.encrypt(src, key, {
-            iv: iv,
-            mode: CryptoJS.mode.CBC,
-            padding: CryptoJS.pad.Pkcs7
-        });
-        return encrypted.toString();
-    }
+    static decrypt(encrypted: string): any {
+        try {
+            // 使用 atob 进行 base64 解码
+            const encryptedJson = atob(encrypted);
+            const encryptedData = JSON.parse(encryptedJson);
+            
+            // 解析 IV 和密文
+            const iv = CryptoJS.enc.Base64.parse(encryptedData.iv);
+            const encryptedText = CryptoJS.enc.Base64.parse(encryptedData.ciphertext);
+            const keyWords = CryptoJS.enc.Utf8.parse(this.key);
 
-    /**
-     * CBC 模式解密
-     * @param src 加密文本
-     */
-    static decryptCBC(src: string) {
-        const key = CryptoJS.enc.Utf8.parse(KEY);
-        const iv = CryptoJS.enc.Utf8.parse(KEY); // 使用相同的key作为iv
-        const decrypted = CryptoJS.AES.decrypt(src, key, {
-            iv: iv,
-            mode: CryptoJS.mode.CBC,
-            padding: CryptoJS.pad.Pkcs7
-        });
-        return decrypted.toString(CryptoJS.enc.Utf8);
-    }
+            // 解密数据
+            const decrypted = CryptoJS.AES.decrypt(
+                CryptoJS.lib.CipherParams.create({
+                    ciphertext: encryptedText
+                }),
+                keyWords,
+                {
+                    iv: iv,
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7
+                }
+            );
 
-    /**
-     * CFB 模式加密
-     * @param src 源文本
-     */
-    static encryptCFB(src: string) {
-        const key = CryptoJS.enc.Utf8.parse(KEY);
-        const iv = CryptoJS.enc.Utf8.parse(KEY);
-        const encrypted = CryptoJS.AES.encrypt(src, key, {
-            iv: iv,
-            mode: CryptoJS.mode.CFB,
-            padding: CryptoJS.pad.Pkcs7
-        });
-        return encrypted.toString();
-    }
-
-    /**
-     * CFB 模式解密
-     * @param src 加密文本
-     */
-    static decryptCFB(src: string) {
-        const key = CryptoJS.enc.Utf8.parse(KEY);
-        const iv = CryptoJS.enc.Utf8.parse(KEY);
-        const decrypted = CryptoJS.AES.decrypt(src, key, {
-            iv: iv,
-            mode: CryptoJS.mode.CFB,
-            padding: CryptoJS.pad.Pkcs7
-        });
-        return decrypted.toString(CryptoJS.enc.Utf8);
+            // 转换为字符串并解析 JSON
+            return JSON.parse(decrypted.toString(CryptoJS.enc.Utf8));
+        } catch (error) {
+            console.error('解密失败:', error instanceof Error ? error.message : String(error));
+            return null;
+        }
     }
 }
 
-export default AESUtil; 
+export default AESUtil;

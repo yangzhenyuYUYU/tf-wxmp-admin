@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Space, Tag, Button, Modal, Form, Select, Input, message } from 'antd';
+import { Table, Card, Space, Tag, Button, Modal, Form, Select, Input, message, Image } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { userApi, User, UserRole, AccountStatus, UserRoleLabel } from '../../api/users';
 import dayjs from 'dayjs';
 import styles from './index.module.less';
+import { EyeOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
@@ -82,6 +83,28 @@ const Users = () => {
   };
 
   const columns: ColumnsType<User> = [
+    {
+      title: '头像',
+      dataIndex: 'avatar',
+      key: 'avatar',
+      width: 80,
+      render: (avatar: string) => (
+        <div className={styles.avatarWrapper}>
+          <Image
+            src={avatar || '/default-avatar.png'} // 确保有默认头像
+            alt="用户头像"
+            width={40}
+            height={40}
+            className={styles.avatar}
+            preview={{
+              mask: <EyeOutlined />,
+              maskClassName: styles.avatarPreviewMask
+            }}
+            fallback="/default-avatar.png"
+          />
+        </div>
+      ),
+    },
     {
       title: '用户ID',
       dataIndex: 'user_id',

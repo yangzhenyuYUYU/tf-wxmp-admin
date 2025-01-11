@@ -16,7 +16,8 @@ const CategoryList = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<Category>();
-  const [form] = Form.useForm();
+  const [createForm] = Form.useForm();
+  const [editForm] = Form.useForm();
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
   const actionRef = useRef<ActionType>();
   const [teachers, setTeachers] = useState<User[]>([]);
@@ -144,7 +145,7 @@ const CategoryList = () => {
         message.success('创建成功');
         setCreateModalVisible(false);
         actionRef.current?.reload();
-        form.resetFields();
+        createForm.resetFields();
       } else {
         message.error(res.msg || '创建失败');
       }
@@ -156,7 +157,7 @@ const CategoryList = () => {
   const handleEdit = (category: Category) => {
     setCurrentCategory(category);
     setEditModalVisible(true);
-    form.setFieldsValue(category);
+    editForm.setFieldsValue(category);
   };
 
   const handleUpdate = async (values: CategoryUpdateParams) => {
@@ -167,7 +168,7 @@ const CategoryList = () => {
         message.success('更新成功');
         setEditModalVisible(false);
         actionRef.current?.reload();
-        form.resetFields();
+        editForm.resetFields();
       } else {
         message.error(res.msg || '更新失败');
       }
@@ -409,10 +410,10 @@ const CategoryList = () => {
         title="新建分类"
         open={createModalVisible}
         onCancel={() => setCreateModalVisible(false)}
-        onOk={() => form.submit()}
+        onOk={() => createForm.submit()}
         destroyOnClose
       >
-        <Form form={form} onFinish={handleCreate}>
+        <Form form={createForm} onFinish={handleCreate}>
           <Form.Item
             name="name"
             label="名称"
@@ -459,10 +460,10 @@ const CategoryList = () => {
         title="编辑分类"
         open={editModalVisible}
         onCancel={() => setEditModalVisible(false)}
-        onOk={() => form.submit()}
+        onOk={() => editForm.submit()}
         destroyOnClose
       >
-        <Form form={form} onFinish={handleUpdate}>
+        <Form form={editForm} onFinish={handleUpdate}>
           <Form.Item
             name="name"
             label="名称"

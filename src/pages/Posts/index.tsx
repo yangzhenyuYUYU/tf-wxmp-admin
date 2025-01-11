@@ -1,4 +1,4 @@
-import { Table, Tag, Button, Space, Card, Form, Select, Input, message, Modal, Image, Descriptions, Carousel, Avatar } from 'antd';
+import { Table, Tag, Button, Space, Card, Form, Select, Input, message, Modal, Image, Descriptions, Avatar } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useState, useEffect } from 'react';
 import { RobotOutlined, SearchOutlined, DownOutlined, DeleteOutlined, EyeOutlined, PictureOutlined, UserOutlined, EditOutlined, StarOutlined } from '@ant-design/icons';
@@ -212,7 +212,7 @@ const Posts = () => {
             type="link"
             danger
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.id)}
+            onClick={() => handleDelete()}
           >
             删除
           </Button>

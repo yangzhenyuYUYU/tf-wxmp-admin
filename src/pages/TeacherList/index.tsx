@@ -78,7 +78,7 @@ const TeacherList = () => {
       title: '平均等待时间',
       dataIndex: 'avg_wait_time',
       key: 'avg_wait_time',
-      render: (times) => `${Math.floor(times[timeRange] / 60)}分钟`,
+      render: (times) => times[timeRange],
     },
   ];
 
